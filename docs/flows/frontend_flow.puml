@@ -1,0 +1,79 @@
+@startuml
+skinparam backgroundColor white
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+title Frontend Flow: Traffic Sign Analysis (Client-Side Logic)
+
+start
+
+:<b>1. Użytkownik loguje się</b>;
+:Otrzymanie JWT Token z Backend;
+note right
+  Nagłówek HTTP:
+  Authorization: Bearer <token>
+end note
+
+:<b>2. Użytkownik klika "START"</b>;
+
+partition "Inicjalizacja"
+  :Pobranie dostępu do kamery\n(navigator.mediaDevices);
+  :Request POST /analysis/start;
+  :Otrzymanie **SessionID**;
+  :Ustaw flagę isStreaming = true;
+
+
+partition "Pętla Przetwarzania (The Loop)"
+  while (Czy isStreaming == true?) is (Tak)
+    :Pobierz klatkę z <video>;
+    :Rzutuj klatkę na ukryty <canvas>;
+
+    :Konwersja Canvas -> **Blob (JPEG)**;
+
+    :Przygotuj **FormData**\n(file: blob, name: "frame.jpg");
+
+    :<b>WYSYŁKA (Network)</b>
+    POST /frame/{sessionID};
+    :Payload: Multipart/Form-Data;
+
+    if (Sukces?) then (200 OK)
+      :Odbierz JSON response;
+      note right
+          "label": "STOP",
+          "bbox": [100, 50, 200, 200]
+      end note
+      :Narysuj ramkę (BBox) na warstwie
+      nad wideo (Canvas Overlay);
+    else (Błąd / 4xx / 5xx)
+      :Zaloguj błąd (nie przerywaj);
+    endif
+
+    :<b>Backpressure Wait</b>
+    Czekaj na zakończenie requestu
+    (await response);
+
+    :requestAnimationFrame();
+  endwhile (Nie - User kliknął STOP)
+
+
+partition "Finalizacja"
+  :<b>3. Użytkownik klika "STOP"</b>;
+  :Request POST /analysis/finish/{sessionID};
+  :Otrzymanie statusu "PROCESSING" (202);
+
+  :Wyświetl loader / spinner;
+
+  repeat
+    :Czekaj 2 sekundy (Polling);
+    :Request GET /analysis/status/{sessionID};
+  repeat while (Status == "COMPLETED"?) is (Nie)
+  ->Tak;
+
+  :Pobierz URL wideo z odpowiedzi;
+  :Wyświetl odtwarzacz wideo z wynikiem;
+
+
+stop
+
+@enduml
