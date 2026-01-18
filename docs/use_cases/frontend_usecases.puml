@@ -1,0 +1,70 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+' Aktor inicjujący (Twoja aplikacja React/Angular/Vue)
+actor "Frontend App\n(Client)" as Frontend
+
+' Systemy zewnętrzne
+actor "MongoDB" as Mongo
+actor "AWS S3\n(File Storage)" as S3
+actor "Google Identity" as Google
+
+package "Backend API System" {
+
+  ' Sekcja Auth
+  rectangle "Auth & Security" {
+    usecase "Verify Google Token" as UC_Verify
+    usecase "Generate Session/JWT" as UC_JWT
+  }
+
+  ' Sekcja Przetwarzania (Live)
+  rectangle "Live Processing" {
+    usecase "Analyze Single Frame" as UC_Analyze
+    usecase "Detect Traffic Sign" as UC_Detect
+  }
+
+  ' Sekcja Archiwizacji (To co chciałeś)
+  rectangle "Archiving & Storage" {
+    usecase "Finalize & Archive Session" as UC_Archive
+    usecase "Store Video File" as UC_S3Upload
+    usecase "Save Metadata Entity" as UC_MongoSave
+  }
+
+  ' Sekcja Pobierania danych
+  rectangle "Data Retrieval" {
+    usecase "Fetch History List" as UC_GetList
+    usecase "Get Video Presigned URL" as UC_GetVideo
+  }
+}
+
+' --- RELACJE AUTH ---
+Frontend --> UC_Verify
+UC_Verify -- Google : "Validate Code"
+UC_Verify ..> UC_JWT : <<include>>
+UC_JWT -- Mongo : "Check/Create User"
+
+' --- RELACJE PROCESSING ---
+Frontend --> UC_Analyze
+UC_Analyze ..> UC_Detect : <<include>>
+' Tu opcjonalnie: Możesz zapisać wynik analizy klatki do bazy, ale przy streamingu często zapisuje się tylko wynik końcowy
+' UC_Detect -- Mongo : "Log detection (optional)"
+
+' --- RELACJE ARCHIWIZACJA (Kluczowe dla Ciebie) ---
+Frontend --> UC_Archive
+' Archiwizacja wymaga dwóch kroków technicznych:
+UC_Archive ..> UC_S3Upload : <<include>>
+UC_Archive ..> UC_MongoSave : <<include>>
+
+' Interakcje z bazami
+UC_S3Upload -- S3 : "Put Object (mp4/webm)"
+UC_MongoSave -- Mongo : "Insert {userId, s3Link, detections}"
+
+' --- RELACJE POBIERANIA ---
+Frontend --> UC_GetList
+UC_GetList -- Mongo : "Query Collection"
+
+Frontend --> UC_GetVideo
+UC_GetVideo -- S3 : "Generate Link"
+
+@enduml
