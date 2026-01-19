@@ -1,0 +1,96 @@
+@startuml
+autonumber
+skinparam boxPadding 10
+skinparam participantPadding 10
+
+actor "Użytkownik" as User
+participant "Frontend App\n(React)" as Front
+
+box "Backend Application (Modular Monolith - Python)" #F0F4F8
+    participant "API Module\n(FastAPI)" as API
+    participant "YOLO Model\n(Inference)" as AI
+    participant "Worker Module\n(Background Stitcher)" as Worker
+end box
+
+database "MongoDB\n(Shared State)" as Mongo
+participant "AWS S3\n(Blob Storage)" as S3
+
+== 1. Inicjalizacja Sesji ==
+User -> Front: Klik "Start Analizy"
+Front -> API: POST /analysis/start\n(Auth Token)
+activate API
+API -> Mongo: Create Session\n{status: "RECORDING", frames: []}
+Mongo --> API: session_id
+API --> Front: { session_id: "xyz" }
+deactivate API
+
+== 2. Pętla Przetwarzania (Fake Streaming) ==
+note right of Front
+  Frontend wysyła klatki sekwencyjnie
+  z wykorzystaniem backpressure (await)
+end note
+
+loop Dopóki trwa nagrywanie
+    Front -> Front: Capture Frame (Canvas -> Blob)
+    Front -> API: POST /frame/xyz (image/jpeg)
+    activate API
+   
+    ' Równoległe działania API
+    par Core Logic
+        API -> AI: Detect Objects (Frame)
+        AI --> API: BBox & Labels
+    par and Persistence
+        API -> S3: Upload Frame (frame_N.jpg)
+        API -> Mongo: Atomic $push\n{s3_key: "...", order: N}
+    end
+
+    API --> Front: JSON Result { bbox: [...], label: "STOP" }
+    deactivate API
+   
+    Front -> User: Rysuj ramkę na podglądzie (Live)
+end
+
+== 3. Finalizacja i Zlecenie Pracy ==
+User -> Front: Klik "Zakończ"
+Front -> API: POST /analysis/finish/xyz
+activate API
+API -> Mongo: Update Status\n{ status: "TO_PROCESS" }
+API --> Front: 202 Accepted\n"Przetwarzanie wideo..."
+deactivate API
+
+== 4. Asynchroniczne Sklejanie (Worker) ==
+note right of Worker
+  Worker działa w osobnym wątku/procesie
+  i odpytuje bazę (Polling)
+end note
+
+loop Co X sekund
+    Worker -> Mongo: FindAndModify\n{status: "TO_PROCESS" -> "PROCESSING"}
+    activate Worker
+   
+    opt Znaleziono sesję do przetworzenia
+        Worker -> Mongo: Pobierz listę klatek (posortowaną)
+        Mongo --> Worker: [key1, key2, key3...]
+       
+        Worker -> S3: Pobierz wszystkie obrazy (.jpg)
+        Worker -> Worker: FFmpeg Stitching\n(JPEGs -> MP4)
+       
+        Worker -> S3: Upload finalnego wideo (.mp4)
+        S3 --> Worker: video_url
+       
+        Worker -> Mongo: Update Session\n{status: "COMPLETED", url: "..."}
+    end
+    deactivate Worker
+end
+
+== 5. Wynik Końcowy ==
+loop Polling (Frontend pyta o status)
+    Front -> API: GET /analysis/status/xyz
+    API -> Mongo: Check Status
+    Mongo --> API: { status: "COMPLETED", videoUrl: "..." }
+    API --> Front: Wynik gotowy
+end
+
+Front -> User: Wyświetl gotowe wideo z playera S3
+
+@enduml
