@@ -4,14 +4,7 @@ export default {
     "at-rule-no-unknown": [
       true,
       {
-        ignoreAtRules: [
-          "tailwind",
-          "apply",
-          "layer",
-          "responsive",
-          "screen",
-          "theme",
-        ],
+        ignoreAtRules: ["tailwind", "apply", "layer", "responsive", "screen", "theme"],
       },
     ],
   },
