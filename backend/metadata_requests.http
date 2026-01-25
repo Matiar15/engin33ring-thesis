@@ -1,0 +1,9 @@
+### GET request to example server
+POST http://localhost:8000/metadata/
+Content-Type: application/json
+
+{
+  "name": "test"
+}
+
+###
