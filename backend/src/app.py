@@ -5,12 +5,12 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
 
 from backend.src.infrastructure.adapter.mongo_database_adapter import (
     MetadataMongoDatabaseAdapter,
 )
 from backend.src.infrastructure.config.logging_config import logging_config
+from backend.src.metadata.api.endpoints import metadata_router
 from backend.src.metadata.application.metadata_use_case import MetadataUseCase
 from backend.src.settings import get_settings
 
@@ -30,8 +30,10 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     yield
 
 
-app = FastAPI(
+app = fastapi.FastAPI(
     title="Engin33ring Thesis",
     lifespan=lifespan,
     debug=True,
 )
+
+app.include_router(metadata_router)
