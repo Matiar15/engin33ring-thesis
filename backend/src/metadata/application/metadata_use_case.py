@@ -23,10 +23,7 @@ class MetadataUseCase:
         metadata = Metadata()
 
         _logger.info(f"Creating metadata with name: {metadata_request.name}...")
-        result: Metadata = await self.database_port.create(
-            collection_name=self.collection_name,
-            domain=metadata,
-        )
+        inserted_id: str = await self.database_port.create(domain=metadata)
 
-        _logger.info(f"Metadata created with id: {result.id}")
-        return map_to_response(result)
+        _logger.info(f"Metadata created with id: {inserted_id}")
+        return map_to_response(inserted_id)

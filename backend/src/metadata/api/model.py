@@ -1,15 +1,14 @@
 import pydantic
 
-from backend.src.metadata.domain.metadata import Metadata
 
 
 class MetadataResponse(pydantic.BaseModel):
-    id: str
+    inserted_id: str
 
 
 class MetadataRequest(pydantic.BaseModel):
     name: str
 
 
-def map_to_response(metadata: Metadata) -> MetadataResponse:
-    return MetadataResponse(id=metadata.id)
+def map_to_response(inserted_id: str) -> MetadataResponse:
+    return MetadataResponse(inserted_id=str(inserted_id))
