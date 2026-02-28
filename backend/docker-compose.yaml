@@ -1,0 +1,54 @@
+services:
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: [ "server", "--console-address", ":9001", "/data" ]
+    volumes:
+      - data-minio:/data
+    environment:
+      MINIO_ROOT_USER: useruseruser
+      MINIO_ROOT_PASSWORD: useruseruser
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-buckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: on-failure
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set dockerminio http://minio:9000 useruseruser useruseruser;
+      /usr/bin/mc mb dockerminio/engin33ring-thesis;
+      exit 0;
+      "
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: user
+    volumes:
+      - mongodb:/data
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://user:user@mongo:27017/
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: user
+      ME_CONFIG_BASICAUTH_PASSWORD: user
+
+volumes:
+    data-minio:
+    mongodb:
