@@ -12,7 +12,7 @@ from backend.src.infrastructure.adapter.mongo_frame_adapter import (
 )
 from backend.src.infrastructure.config.logging_config import logging_config
 from backend.src.frame.api.endpoints import frames_router
-from backend.src.frame.application.frame_use_case import CreateFrameUseCase
+from backend.src.frame.application.create_frame_use_case import CreateFrameUseCase
 from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.settings import get_settings
 

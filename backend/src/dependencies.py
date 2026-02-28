@@ -3,7 +3,7 @@ import fastapi
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
 )
-from backend.src.frame.application.frame_use_case import CreateFrameUseCase
+from backend.src.frame.application.create_frame_use_case import CreateFrameUseCase
 
 
 def get_create_frame_use_case(request: fastapi.Request) -> CreateFrameUseCase:
