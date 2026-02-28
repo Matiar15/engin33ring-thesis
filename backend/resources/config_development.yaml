@@ -1,10 +1,10 @@
 database:
   user: user
   password: user
-  host: "localhost:8081"
+  host: "localhost:27017"
   name: engin33ring-thesis
 
-long_term_storage:
+# long_term_storage:
 
 
 logging:

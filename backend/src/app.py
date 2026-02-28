@@ -5,6 +5,7 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
+from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import CreateAnalysisUseCase
 from backend.src.infrastructure.adapter.mongo_analysis_adapter import MongoAnalysisAdapter
 from backend.src.infrastructure.adapter.mongo_frame_adapter import (
@@ -48,3 +49,4 @@ app = fastapi.FastAPI(
 )
 
 app.include_router(frames_router)
+app.include_router(analysis_router)
