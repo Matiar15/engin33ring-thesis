@@ -5,13 +5,15 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
-
-from backend.src.infrastructure.adapter.mongo_database_adapter import (
-    MetadataMongoDatabaseAdapter,
+from backend.src.analysis.application.create_analysis_use_case import CreateAnalysisUseCase
+from backend.src.infrastructure.adapter.mongo_analysis_adapter import MongoAnalysisAdapter
+from backend.src.infrastructure.adapter.mongo_frame_adapter import (
+    MongoFrameAdapter,
 )
 from backend.src.infrastructure.config.logging_config import logging_config
-from backend.src.metadata.api.endpoints import metadata_router
-from backend.src.metadata.application.metadata_use_case import MetadataUseCase
+from backend.src.frame.api.endpoints import frames_router
+from backend.src.frame.application.frame_use_case import CreateFrameUseCase
+from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.settings import get_settings
 
 logging_config()
@@ -23,10 +25,19 @@ _logger = logging.getLogger(__name__)
 async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     _logger.info("Starting application...")
     settings = get_settings()
-    metadata_use_case = MetadataUseCase(
-        database_port=MetadataMongoDatabaseAdapter(settings),
+    mongo_client = mongo_config(settings)
+    analysis_port = MongoAnalysisAdapter(mongo_client)
+    create_frame_use_case = CreateFrameUseCase(
+        frame_port=MongoFrameAdapter(mongo_client),
+        analysis_port=analysis_port,
     )
-    app.state.metadata_use_case = metadata_use_case
+    create_analysis_use_case = CreateAnalysisUseCase(
+        analysis_port=analysis_port,
+    )
+
+    app.state.create_frame_use_case = create_frame_use_case
+    app.state.create_analysis_use_case = create_analysis_use_case
+
     yield
 
 
@@ -36,4 +47,4 @@ app = fastapi.FastAPI(
     debug=True,
 )
 
-app.include_router(metadata_router)
+app.include_router(frames_router)
