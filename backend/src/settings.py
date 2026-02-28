@@ -9,6 +9,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
 
 
 class DatabaseSettings(pydantic.BaseModel):
+    protocol: str = "mongodb"
     user: str
     password: str
     host: str
