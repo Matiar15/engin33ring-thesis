@@ -15,6 +15,10 @@ class DatabaseSettings(pydantic.BaseModel):
     host: str
     name: str
 
+class LongTermStorageSettings(pydantic.BaseModel):
+    url: str
+    user: str
+    password: str
 
 class LoggingSettings(pydantic.BaseModel):
     level: str = "INFO"
@@ -23,6 +27,7 @@ class LoggingSettings(pydantic.BaseModel):
 class Settings(pydantic_settings.BaseSettings):
     application_name: str = "engin33ring-thesis"
     database: DatabaseSettings
+    long_term_storage: LongTermStorageSettings
     logging: LoggingSettings = LoggingSettings()
 
     model_config = {"env_nested_delimiter": "__"}

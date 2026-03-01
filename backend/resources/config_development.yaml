@@ -4,7 +4,11 @@ database:
   host: "localhost:27017"
   name: engin33ring-thesis
 
-# long_term_storage:
+long_term_storage:
+  url: "http://localhost:9000"
+  user: useruseruser
+  password: useruseruser
+
 
 
 logging:
