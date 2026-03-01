@@ -55,12 +55,6 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     app.state.create_frame_use_case = create_frame_use_case
     app.state.create_analysis_use_case = create_analysis_use_case
 
-    _logger.info("Initialized application.")
-
-    _logger.info("Instrumenting application with prometheus...")
-    Instrumentator().instrument(app).expose(app)
-    _logger.info("Application instrumented with prometheus.")
-
     _logger.info("Application started.")
     yield
     _logger.info("Stopping application...")
@@ -74,3 +68,5 @@ app = fastapi.FastAPI(
 
 app.include_router(frames_router)
 app.include_router(analysis_router)
+
+Instrumentator().instrument(app).expose(app)
