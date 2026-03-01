@@ -22,7 +22,7 @@ def mongo_config(
             connection_string,
             maxPoolSize=20,
             maxIdleTimeMS=30_000,
-            authSource="admin"
+            authSource="admin",
         )
     )[settings.database.name]
 
