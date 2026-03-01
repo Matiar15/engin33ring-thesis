@@ -14,6 +14,7 @@ class FrameResponse(pydantic.BaseModel):
 
 class FramePayload(pydantic.BaseModel):
     user_id: str  # todo: retrieve this from token
+    incoming_id: str
     frame: fastapi.UploadFile
     analysis_id: str
 
