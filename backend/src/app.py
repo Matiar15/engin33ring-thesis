@@ -21,6 +21,7 @@ from backend.src.frame.application.create_frame_use_case import CreateFrameUseCa
 from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.infrastructure.config.rustfs_config import rustfs_config
 from backend.src.settings import get_settings
+from prometheus_fastapi_instrumentator import Instrumentator
 
 logging_config()
 
@@ -55,6 +56,12 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     app.state.create_analysis_use_case = create_analysis_use_case
 
     _logger.info("Initialized application.")
+
+    _logger.info("Instrumenting application with prometheus...")
+    Instrumentator().instrument(app).expose(app)
+    _logger.info("Application instrumented with prometheus.")
+
+    _logger.info("Application started.")
     yield
     _logger.info("Stopping application...")
 
