@@ -1,7 +1,7 @@
+import datetime
 import logging
 
 from backend.src.analysis.application.analysis_port import AnalysisPort
-from backend.src.frame.application.frame_port import FramePort
 from backend.src.frame.api.model import (
     FramePayload,
     FrameResponse,
@@ -18,11 +18,9 @@ _logger = logging.getLogger(__name__)
 class CreateFrameUseCase:
     def __init__(
         self,
-        frame_port: FramePort,
         analysis_port: AnalysisPort,
         long_term_storage_port: LongTermStoragePort,
     ):
-        self.frame_port = frame_port
         self.analysis_port = analysis_port
         self.long_term_storage_port = long_term_storage_port
 
@@ -63,10 +61,17 @@ class CreateFrameUseCase:
 
         _logger.info(f"Creating frame for user: {frame_payload.user_id}...")
 
-        payload = frame_payload.model_dump() | {"frame_url": frame_url}
-        payload.pop("frame")
-
-        await self.analysis_port.update(id=str(analysis.id), frame=Frame.from_payload(payload), status="processing")
+        await self.analysis_port.update(
+            id=str(analysis.id),
+            frame=Frame.from_payload(
+                {
+                    "id": frame_payload.incoming_id,
+                    "frame_url": frame_url,
+                    "created_at": datetime.datetime.now(),
+                }
+            ),
+            status="processing"
+        )
 
         _logger.info(f"Frame created in analysis!")
         return map_to_response()

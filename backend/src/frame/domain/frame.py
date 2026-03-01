@@ -1,15 +1,13 @@
-import typing
-
 import pydantic
 
-PyObjectId = typing.Annotated[str, pydantic.BeforeValidator(str)]
+from datetime import datetime
+
 
 
 class Frame(pydantic.BaseModel):
-    id: PyObjectId | None = pydantic.Field(alias="_id", default=None)
-    user_id: str
-    analysis_id: str
+    id: str
     frame_url: str
+    created_at: datetime
 
     model_config = {
         "populate_by_name": True,
