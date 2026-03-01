@@ -16,19 +16,14 @@ class MongoAnalysisAdapter(AnalysisPort):
         self,
         client: AsyncDatabase[typing.Mapping[str, typing.Any] | typing.Any],
     ):
-        self.client: AsyncCollection[Analysis] = client["analysis"]
+        self.client: AsyncCollection[Analysis] = client["analysis"]  # type: ignore
 
     async def create(
         self,
         analysis: Analysis,
     ) -> str:
         _logger.info(f"Creating analysis for user: {analysis.user_id}...")
-        insert_one_result = await self.client.insert_one(
-            analysis.model_dump(
-                by_alias=True,
-                exclude_unset=True,
-            )
-        )
+        insert_one_result = await self.client.insert_one(analysis)
 
         inserted_id = str(insert_one_result.inserted_id)
         _logger.info(f"Analysis created with id: {inserted_id}")
@@ -60,12 +55,15 @@ class MongoAnalysisAdapter(AnalysisPort):
         status = kwargs.pop("status", None)
 
         if frame:
-            updates.update({"$push": {"frames": frame.model_dump(by_alias=True, exclude_unset=True)}})
+            updates.update(
+                {
+                    "$push": {
+                        "frames": frame.model_dump(by_alias=True, exclude_unset=True)
+                    }
+                }
+            )
 
         if status:
             updates.update({"$set": {"status": status}})
 
-        await self.client.update_one(
-            filter={"_id": bson.ObjectId(id)},
-            update=updates
-        )
+        await self.client.update_one(filter={"_id": bson.ObjectId(id)}, update=updates)
