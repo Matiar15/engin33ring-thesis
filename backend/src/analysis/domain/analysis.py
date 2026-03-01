@@ -8,6 +8,7 @@ PyObjectId = typing.Annotated[str, pydantic.BeforeValidator(str)]
 class Analysis(pydantic.BaseModel):
     id: PyObjectId | None = pydantic.Field(alias="_id", default=None)
     user_id: str
+    status: str
 
     model_config = {
         "populate_by_name": True,

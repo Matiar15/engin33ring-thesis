@@ -1,4 +1,5 @@
 import abc
+import typing
 
 from backend.src.analysis.domain.analysis import Analysis
 
@@ -16,5 +17,10 @@ class AnalysisPort(abc.ABC):
         self,
         id: str,
         user_id: str,
+        statuses: list[str] | None = None,
     ) -> Analysis | None:
+        """"""
+
+    @abc.abstractmethod
+    async def update(self, id: str, **kwargs: typing.Any) -> None:
         """"""
