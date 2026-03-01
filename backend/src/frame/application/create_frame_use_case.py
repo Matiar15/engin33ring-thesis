@@ -8,6 +8,9 @@ from backend.src.frame.api.model import (
     map_to_response,
 )
 from backend.src.frame.domain.frame import Frame
+from backend.src.long_term_storage.application.long_term_storage_port import (
+    LongTermStoragePort,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -17,9 +20,11 @@ class CreateFrameUseCase:
         self,
         frame_port: FramePort,
         analysis_port: AnalysisPort,
+        long_term_storage_port: LongTermStoragePort,
     ):
         self.frame_port = frame_port
         self.analysis_port = analysis_port
+        self.long_term_storage_port = long_term_storage_port
 
     async def create(
         self,
@@ -30,8 +35,13 @@ class CreateFrameUseCase:
         _logger.info(
             f"Validating existence of analysis with id: {frame_payload.analysis_id}..."
         )
-        analysis = self.analysis_port.get_one(
-            id=frame_payload.analysis_id, user_id=frame_payload.user_id
+        analysis = await self.analysis_port.get_one(
+            id=frame_payload.analysis_id,
+            user_id=frame_payload.user_id,
+            statuses=[
+                "created",
+                "processing",
+            ],
         )
 
         if not analysis:
@@ -43,10 +53,20 @@ class CreateFrameUseCase:
             f"Analysis with id: {frame_payload.analysis_id} exists. Proceeding with frame creation..."
         )
 
-        _logger.info(f"Creating frame for user: {frame_payload.user_id}...")
-        inserted_id: str = await self.frame_port.create(
-            frame=Frame.from_payload(frame_payload.model_dump())
+        _logger.info(f"Storing frame file...")
+        frame_url = await self.long_term_storage_port.store_file(
+            frame_payload.frame.file,
+            bucket_name="engin33ring-thesis-frames",
+            naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/",
         )
+        _logger.info(f"Frame file stored at: {frame_url}")
 
-        _logger.info(f"Frame created with id: {inserted_id}")
+        _logger.info(f"Creating frame for user: {frame_payload.user_id}...")
+
+        payload = frame_payload.model_dump() | {"frame_url": frame_url}
+        payload.pop("frame")
+
+        await self.analysis_port.update(id=str(analysis.id), frame=Frame.from_payload(payload), status="processing")
+
+        _logger.info(f"Frame created in analysis!")
         return map_to_response()

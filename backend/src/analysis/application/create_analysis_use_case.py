@@ -1,6 +1,10 @@
 import logging
 
-from backend.src.analysis.api.model import AnalysisPayload, AnalysisResponse, map_to_response
+from backend.src.analysis.api.model import (
+    AnalysisPayload,
+    AnalysisResponse,
+    map_to_response,
+)
 from backend.src.analysis.application.analysis_port import AnalysisPort
 from backend.src.analysis.domain.analysis import Analysis
 
@@ -17,7 +21,9 @@ class CreateAnalysisUseCase:
     async def create(self, analysis_payload: AnalysisPayload) -> AnalysisResponse:
         _logger.info(f"Creating analysis for user: {analysis_payload.user_id}...")
         inserted_id: str = await self.analysis_port.create(
-            analysis=Analysis.from_payload(analysis_payload.model_dump())
+            analysis=Analysis.from_payload(
+                analysis_payload.model_dump() | {"status": "created"}
+            )
         )
 
         _logger.info(f"Analysis created with id: {inserted_id}")

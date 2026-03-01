@@ -6,8 +6,13 @@ import fastapi
 from contextlib import asynccontextmanager
 
 from backend.src.analysis.api.endpoints import analysis_router
-from backend.src.analysis.application.create_analysis_use_case import CreateAnalysisUseCase
-from backend.src.infrastructure.adapter.mongo_analysis_adapter import MongoAnalysisAdapter
+from backend.src.analysis.application.create_analysis_use_case import (
+    CreateAnalysisUseCase,
+)
+from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import RustFSLongTermStorageAdapter
+from backend.src.infrastructure.adapter.mongo_analysis_adapter import (
+    MongoAnalysisAdapter,
+)
 from backend.src.infrastructure.adapter.mongo_frame_adapter import (
     MongoFrameAdapter,
 )
@@ -28,9 +33,11 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     settings = get_settings()
     mongo_client = mongo_config(settings)
     analysis_port = MongoAnalysisAdapter(mongo_client)
+    long_term_storage_port = RustFSLongTermStorageAdapter(settings)
     create_frame_use_case = CreateFrameUseCase(
         frame_port=MongoFrameAdapter(mongo_client),
         analysis_port=analysis_port,
+        long_term_storage_port=long_term_storage_port,
     )
     create_analysis_use_case = CreateAnalysisUseCase(
         analysis_port=analysis_port,
