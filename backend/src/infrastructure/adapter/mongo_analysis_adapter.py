@@ -23,7 +23,12 @@ class MongoAnalysisAdapter(AnalysisPort):
         analysis: Analysis,
     ) -> str:
         _logger.info(f"Creating analysis for user: {analysis.user_id}...")
-        insert_one_result = await self.client.insert_one(analysis)
+        insert_one_result = await self.client.insert_one(
+            analysis.model_dump(
+                by_alias=True,
+                exclude_unset=True,
+            )
+        )
 
         inserted_id = str(insert_one_result.inserted_id)
         _logger.info(f"Analysis created with id: {inserted_id}")
