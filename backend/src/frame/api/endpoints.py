@@ -13,6 +13,7 @@ async def create(
     user_id: typing.Annotated[str, fastapi.Form(...)],
     analysis_id: typing.Annotated[str, fastapi.Form(...)],
     frame: typing.Annotated[fastapi.UploadFile, fastapi.File(...)],
+    incoming_id: typing.Annotated[str, fastapi.Form(...)],
     frame_use_case: typing.Annotated[
         CreateFrameUseCase, fastapi.Depends(get_create_frame_use_case)
     ],
@@ -21,5 +22,6 @@ async def create(
         user_id=user_id,
         analysis_id=analysis_id,
         frame=frame,
+        incoming_id=incoming_id,
     )
     return await frame_use_case.create(payload)
