@@ -1,9 +1,19 @@
-### GET request to example server
-POST http://localhost:8000/analysis/
-Content-Type: application/json
+POST http://localhost:8000/frames/
+Content-Type: multipart/form-data; boundary=boundary
 
-{
-  "user_id": "mati"
-}
+--boundary
+Content-Disposition: form-data; name="frame"; filename="sample_img.jpg"
+Content-Type: image/jpeg
+
+< sample.jpg
+--boundary
+Content-Disposition: form-data; name="user_id"
+
+mati
+--boundary
+Content-Disposition: form-data; name="analysis_id"
+
+69a425e18c1b7d8863be0201
+--boundary--
 
 ###
