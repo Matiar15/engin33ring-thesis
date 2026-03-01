@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 
 def rustfs_config(settings: Settings) -> BaseClient:
-    _logger.info("Connecting to RustFS...")
+    _logger.info(f"Connecting to RustFS at {settings.long_term_storage.url}...")
 
     client = boto3.client(
         "s3",
