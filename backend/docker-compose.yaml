@@ -1,6 +1,8 @@
 services:
   rustfs:
     image: rustfs/rustfs:latest
+    networks:
+      - monitoring
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -11,6 +13,7 @@ services:
       RUSTFS_ACCESS_KEY: useruseruser
       RUSTFS_SECRET_KEY: useruseruser
       RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_ENDPOINT: "http://otel-collector:4318"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/rustfs/health/live" ]
       interval: 5s
@@ -20,6 +23,8 @@ services:
   mongo:
     image: mongo
     restart: always
+    networks:
+      - monitoring
     environment:
       MONGO_INITDB_ROOT_USERNAME: user
       MONGO_INITDB_ROOT_PASSWORD: user
@@ -31,6 +36,8 @@ services:
   mongo-express:
     image: mongo-express
     restart: always
+    networks:
+      - monitoring
     ports:
       - "8081:8081"
     environment:
@@ -38,6 +45,52 @@ services:
       ME_CONFIG_BASICAUTH_ENABLED: true
       ME_CONFIG_BASICAUTH_USERNAME: user
       ME_CONFIG_BASICAUTH_PASSWORD: user
+
+  mongodb-exporter:
+    image: bitnami/mongodb-exporter:latest
+    networks:
+      - monitoring
+    environment:
+      - MONGODB_URI=mongodb://user:user@mongo:27017/admin
+    ports:
+      - "9216:9216"
+    depends_on:
+      - mongo
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-otlp-receiver"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
+    volumes:
+      - ./resources/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    networks:
+      - monitoring
+    volumes:
+      - ./resources/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "13133:13133" # health check
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Collector metrics
+      - "8889:8889"   # App metrics exporter
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring:
+    driver: bridge
 
 volumes:
     data-rustfs:
