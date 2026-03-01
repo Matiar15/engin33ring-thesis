@@ -1,0 +1,44 @@
+services:
+  rustfs:
+    image: rustfs/rustfs:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: [ "/data", "--address", ":9000", "--console-enable" ]
+    volumes:
+      - data-rustfs:/data
+    environment:
+      RUSTFS_ACCESS_KEY: useruseruser
+      RUSTFS_SECRET_KEY: useruseruser
+      RUSTFS_CONSOLE_ENABLE: "true"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/rustfs/health/live" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: user
+    ports:
+     - "27017:27017"
+    volumes:
+      - mongodb:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://user:user@mongo:27017/
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: user
+      ME_CONFIG_BASICAUTH_PASSWORD: user
+
+volumes:
+    data-rustfs:
+    mongodb:

@@ -1,0 +1,23 @@
+POST http://localhost:8000/frames/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="frame"; filename="sample_img.jpg"
+Content-Type: image/jpeg
+
+< sample.jpg
+--boundary
+Content-Disposition: form-data; name="user_id"
+
+mati
+--boundary
+Content-Disposition: form-data; name="analysis_id"
+
+69a4946a3796dfd85f563d6d
+--boundary--
+Content-Disposition: form-data; name="incoming_id"
+
+2
+--boundary--
+
+###

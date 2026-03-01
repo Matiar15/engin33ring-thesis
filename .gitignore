@@ -299,3 +299,5 @@ cython_debug/
 /.idea/misc.xml
 /.idea/inspectionProfiles/profiles_settings.xml
 !/.idea/prettier.xml
+
+node_modules

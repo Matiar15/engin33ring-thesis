@@ -4,7 +4,7 @@ frontend_dir = frontend
 .PHONY: lint front-lint
 
 backend-lint:
-	uv run --directory $(backend_dir) --active ruff check --fix
+	uv run --directory $(backend_dir) --active ruff format
 
 mypy:
 	uv run --directory $(backend_dir) --active mypy .
