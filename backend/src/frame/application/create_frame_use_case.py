@@ -70,7 +70,7 @@ class CreateFrameUseCase:
                     "created_at": datetime.datetime.now(),
                 }
             ),
-            status="processing"
+            status="processing",
         )
 
         _logger.info(f"Frame created in analysis!")

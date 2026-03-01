@@ -1,5 +1,6 @@
 import logging
 import typing
+from typing import Any, Mapping
 
 import pymongo
 
@@ -17,7 +18,7 @@ def mongo_config(
 
     _logger.info(f"Connecting to MongoDB at {settings.database.host}...")
 
-    mongo_client = (
+    mongo_client: AsyncDatabase[Mapping[str, Any] | Any] = (
         pymongo.AsyncMongoClient(
             connection_string,
             maxPoolSize=20,

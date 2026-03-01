@@ -3,7 +3,6 @@ import pydantic
 from datetime import datetime
 
 
-
 class Frame(pydantic.BaseModel):
     id: str
     frame_url: str

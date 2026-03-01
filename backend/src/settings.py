@@ -15,10 +15,12 @@ class DatabaseSettings(pydantic.BaseModel):
     host: str
     name: str
 
+
 class LongTermStorageSettings(pydantic.BaseModel):
     url: str
     user: str
     password: str
+
 
 class LoggingSettings(pydantic.BaseModel):
     level: str = "INFO"
