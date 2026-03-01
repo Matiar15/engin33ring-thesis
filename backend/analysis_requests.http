@@ -1,9 +1,9 @@
 ### GET request to example server
-POST http://localhost:8000/metadata/
+POST http://localhost:8000/analysis/
 Content-Type: application/json
 
 {
-  "name": "test"
+  "user_id": "mati"
 }
 
 ###
