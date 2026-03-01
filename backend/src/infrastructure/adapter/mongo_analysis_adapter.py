@@ -27,7 +27,7 @@ class MongoAnalysisAdapter(AnalysisPort):
             analysis.model_dump(
                 by_alias=True,
                 exclude_unset=True,
-            )
+            )  # type: ignore
         )
 
         inserted_id = str(insert_one_result.inserted_id)
