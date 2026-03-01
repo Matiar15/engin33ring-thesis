@@ -57,9 +57,13 @@ class MongoAnalysisAdapter(AnalysisPort):
     async def update(self, id: str, **kwargs: typing.Any) -> None:
         updates = dict()
         frame = kwargs.pop("frame", None)
+        status = kwargs.pop("status", None)
 
         if frame:
             updates.update({"$push": {"frames": frame.model_dump(by_alias=True, exclude_unset=True)}})
+
+        if status:
+            updates.update({"$set": {"status": status}})
 
         await self.client.update_one(
             filter={"_id": bson.ObjectId(id)},
