@@ -1,0 +1,25 @@
+name: Style
+on: [push, pull_request]
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+      - run: |
+          | make backend-lint &&
+          | make mypy
+
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 20
+      - run: |
+          | make front-lint
+          
