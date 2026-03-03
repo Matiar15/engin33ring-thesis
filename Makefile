@@ -4,10 +4,13 @@ frontend_dir = frontend
 .PHONY: lint front-lint
 
 backend-lint:
-	uv run --directory $(backend_dir) --active ruff format
+	PYTHONPATH=$(shell pwd) uv run --directory $(backend_dir) ruff format
 
 mypy:
-	uv run --directory $(backend_dir) --active mypy .
+	PYTHONPATH=$(shell pwd) uv run --directory $(backend_dir) mypy .
+
+tests:
+	PYTHONPATH=$(shell pwd) uv run --directory $(backend_dir) pytest -v
 
 front-lint:
 	npm run --prefix $(frontend_dir) lint:eslint && npm run --prefix $(frontend_dir) lint:stylelint && npm run --prefix $(frontend_dir) lint:prettier
