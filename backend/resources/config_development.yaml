@@ -13,3 +13,6 @@ long_term_storage:
 
 logging:
   level: debug
+
+otel:
+  endpoint: "http://localhost:4318"
