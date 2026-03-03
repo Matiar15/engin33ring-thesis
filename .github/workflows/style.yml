@@ -2,7 +2,7 @@ name: Style
 on: [push, pull_request]
 
 jobs:
-  backend-lint:
+  Backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -14,13 +14,14 @@ jobs:
           make backend-lint
           make mypy
 
-  frontend-lint:
+  Frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6.2.0
         with:
-          node-version: 20
-      - run: npm install
-      - run: make front-lint
+          node-version: 22
+      - run: |
+          npm i
+          make front-lint
           
