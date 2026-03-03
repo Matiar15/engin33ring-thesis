@@ -22,6 +22,6 @@ jobs:
         with:
           node-version: 22
       - run: |
-          npm i
+          npm install --prefix frontend
           make front-lint
           
