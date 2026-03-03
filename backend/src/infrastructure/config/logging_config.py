@@ -18,7 +18,7 @@ def logging_config() -> None:
     set_logger_provider(logger_provider)
 
     otlp_exporter = OTLPLogExporter(
-        endpoint=settings.otel.endpoint,
+        endpoint=f"{settings.otel.endpoint}/v1/logs",
     )
     logger_provider.add_log_record_processor(BatchLogRecordProcessor(otlp_exporter))
 

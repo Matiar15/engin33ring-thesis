@@ -111,6 +111,14 @@ services:
       - "--httpListenAddr=:9428"
     restart: unless-stopped
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    networks:
+      - monitoring
+    ports:
+      - "16686:16686" # Jaeger UI
+    restart: unless-stopped
+
 networks:
   monitoring:
     driver: bridge
