@@ -88,6 +88,16 @@ services:
     depends_on:
       - prometheus
 
+  perses:
+    image: persesdev/perses:latest
+    networks:
+      - monitoring
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
 networks:
   monitoring:
     driver: bridge
