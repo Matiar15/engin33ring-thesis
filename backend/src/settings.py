@@ -27,7 +27,7 @@ class LoggingSettings(pydantic.BaseModel):
 
 
 class OTELSettings(pydantic.BaseModel):
-    endpoint: str = "http://localhost:4318/v1/logs"
+    endpoint: str = "http://localhost:4318"
 
 
 class Settings(pydantic_settings.BaseSettings):
