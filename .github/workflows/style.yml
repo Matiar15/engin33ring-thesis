@@ -1,0 +1,27 @@
+name: Style
+on: [push]
+
+jobs:
+  Backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          make backend-lint
+          make mypy
+
+  Frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 22
+      - run: |
+          npm install --prefix frontend
+          make front-lint
+          

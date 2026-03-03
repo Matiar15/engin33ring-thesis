@@ -16,13 +16,18 @@ from backend.src.infrastructure.adapter.mongo_analysis_adapter import (
     MongoAnalysisAdapter,
 )
 from backend.src.infrastructure.config.logging_config import logging_config
+from backend.src.infrastructure.config.tracing_config import tracing_config
 from backend.src.frame.api.endpoints import frames_router
 from backend.src.frame.application.create_frame_use_case import CreateFrameUseCase
 from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.infrastructure.config.rustfs_config import rustfs_config
 from backend.src.settings import get_settings
+from prometheus_fastapi_instrumentator import Instrumentator
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
 
 logging_config()
+tracing_config()
 
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +59,7 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     app.state.create_frame_use_case = create_frame_use_case
     app.state.create_analysis_use_case = create_analysis_use_case
 
-    _logger.info("Initialized application.")
+    _logger.info("Application started.")
     yield
     _logger.info("Stopping application...")
 
@@ -67,3 +72,6 @@ app = fastapi.FastAPI(
 
 app.include_router(frames_router)
 app.include_router(analysis_router)
+
+Instrumentator().instrument(app).expose(app)
+FastAPIInstrumentor.instrument_app(app)
