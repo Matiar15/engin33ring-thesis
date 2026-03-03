@@ -26,11 +26,16 @@ class LoggingSettings(pydantic.BaseModel):
     level: str = "INFO"
 
 
+class OTELSettings(pydantic.BaseModel):
+    endpoint: str = "http://localhost:4318/v1/logs"
+
+
 class Settings(pydantic_settings.BaseSettings):
     application_name: str = "engin33ring-thesis"
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
     logging: LoggingSettings = LoggingSettings()
+    otel: OTELSettings = OTELSettings()
 
     model_config = {"env_nested_delimiter": "__"}
 

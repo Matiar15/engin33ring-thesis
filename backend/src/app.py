@@ -22,6 +22,8 @@ from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.infrastructure.config.rustfs_config import rustfs_config
 from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
 
 logging_config()
 
@@ -70,3 +72,4 @@ app.include_router(frames_router)
 app.include_router(analysis_router)
 
 Instrumentator().instrument(app).expose(app)
+FastAPIInstrumentor.instrument_app(app)
