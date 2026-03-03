@@ -9,9 +9,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: 3.13
+      - uses: astral-sh/setup-uv@v5
       - run: |
-          | make backend-lint &&
-          | make mypy
+          make backend-lint
+          make mypy
 
   frontend-lint:
     runs-on: ubuntu-latest
@@ -20,6 +21,6 @@ jobs:
       - uses: actions/setup-node@v6.2.0
         with:
           node-version: 20
-      - run: |
-          | make front-lint
+      - run: npm install
+      - run: make front-lint
           
