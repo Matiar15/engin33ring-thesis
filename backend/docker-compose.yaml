@@ -98,6 +98,19 @@ services:
     depends_on:
       - prometheus
 
+  victoria-logs:
+    image: victoriametrics/victoria-logs:latest
+    networks:
+      - monitoring
+    ports:
+      - "9428:9428"
+    volumes:
+      - victoria-logs-data:/victoria-logs-data
+    command:
+      - "--storageDataPath=/victoria-logs-data"
+      - "--httpListenAddr=:9428"
+    restart: unless-stopped
+
 networks:
   monitoring:
     driver: bridge
@@ -105,3 +118,4 @@ networks:
 volumes:
     data-rustfs:
     mongodb:
+    victoria-logs-data:

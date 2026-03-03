@@ -28,6 +28,8 @@ exporters:
     metric_expiration: 5m
     resource_to_telemetry_conversion:
       enabled: true
+  otlphttp/victorialogs:
+    logs_endpoint: "http://victoria-logs:9428/insert/opentelemetry/v1/logs"
 
 extensions:
   health_check:
@@ -44,6 +46,10 @@ service:
       receivers: [ otlp ]
       processors: [ batch ]
       exporters: [ prometheus ]
+    logs:
+      receivers: [ otlp ]
+      processors: [ transform/logs, batch ]
+      exporters: [ otlphttp/victorialogs ]
   telemetry:
     logs:
       level: "info"
