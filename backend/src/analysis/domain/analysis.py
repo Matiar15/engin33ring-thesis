@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 import pydantic
@@ -11,6 +12,7 @@ class Analysis(pydantic.BaseModel):
     id: PyObjectId | None = pydantic.Field(alias="_id", default=None)
     user_id: str
     status: str
+    modified_at: datetime.datetime
     frames: list[Frame] | None = None
 
     model_config = {
