@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
 )
-from backend.src.analysis.api.model import AnalysisPayload, AnalysisResponse
+from backend.src.analysis.api.model import CreateAnalysisPayload, CreateAnalysisResponse
 from backend.src.analysis.domain.analysis import Analysis
 
 
@@ -20,14 +20,14 @@ def use_case(mock_analysis_port):
 @pytest.mark.asyncio
 async def test_create_analysis_success(use_case, mock_analysis_port):
     # Given
-    payload = AnalysisPayload(user_id="user_123")
+    payload = CreateAnalysisPayload(user_id="user_123")
     mock_analysis_port.create.return_value = "generated_id_456"
 
     # When
     response = await use_case.create(payload)
 
     # Then
-    assert isinstance(response, AnalysisResponse)
+    assert isinstance(response, CreateAnalysisResponse)
     assert response.id == "generated_id_456"
 
     # Verify port call
