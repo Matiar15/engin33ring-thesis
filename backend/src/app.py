@@ -5,7 +5,7 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
-from analysis.application.end_analysis_use_case import EndAnalysisUseCase
+from backend.src.analysis.application.end_analysis_use_case import EndAnalysisUseCase
 from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
@@ -22,11 +22,11 @@ from backend.src.frame.api.endpoints import frames_router
 from backend.src.frame.application.create_frame_use_case import CreateFrameUseCase
 from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.infrastructure.config.rustfs_config import rustfs_config
+from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import FFMpegStitcherAdapter
 from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-from infrastructure.adapter.ffmpeg_stitcher_adapter import FFMpegStitcherAdapter
 
 logging_config()
 tracing_config()
