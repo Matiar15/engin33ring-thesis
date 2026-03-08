@@ -66,9 +66,6 @@ class Settings(pydantic_settings.BaseSettings):
         )
 
 
-settings = Settings()
-
-
 @functools.lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return settings
+    return Settings()
