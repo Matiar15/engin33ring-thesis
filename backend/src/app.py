@@ -16,13 +16,15 @@ from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import 
 from backend.src.infrastructure.adapter.mongo_analysis_adapter import (
     MongoAnalysisAdapter,
 )
+from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import (
+    FFMpegStitcherAdapter,
+)
 from backend.src.infrastructure.config.logging_config import logging_config
 from backend.src.infrastructure.config.tracing_config import tracing_config
 from backend.src.frame.api.endpoints import frames_router
 from backend.src.frame.application.create_frame_use_case import CreateFrameUseCase
 from backend.src.infrastructure.config.mongo_config import mongo_config
 from backend.src.infrastructure.config.rustfs_config import rustfs_config
-from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import FFMpegStitcherAdapter
 from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
