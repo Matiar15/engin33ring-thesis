@@ -61,7 +61,7 @@ class FFMpegStitcherAdapter(StitcherPort):
         _logger.info(f"Stitching completed!")
 
         _logger.info("Uploading video to long term storage...")
-        video_url = await self.store_video(
+        video_url = await self._store_video(
             video_name=video_name,
             naming_strategy=f"{user_id}/",
         )
@@ -89,7 +89,7 @@ class FFMpegStitcherAdapter(StitcherPort):
             .run()
         )
 
-    async def store_video(
+    async def _store_video(
         self,
         video_name: str,
         naming_strategy: str,
