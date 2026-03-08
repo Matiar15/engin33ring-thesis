@@ -56,6 +56,7 @@ class CreateFrameUseCase:
             frame_payload.frame.file,
             bucket_name="engin33ring-thesis-frames",
             naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/",
+            format="jpg",
         )
         _logger.info(f"Frame file stored at: {frame_url}")
 
