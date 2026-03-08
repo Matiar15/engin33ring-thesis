@@ -25,7 +25,11 @@ class CreateAnalysisUseCase:
         _logger.info(f"Creating analysis for user: {analysis_payload.user_id}...")
         inserted_id: str = await self.analysis_port.create(
             analysis=Analysis.from_payload(
-                analysis_payload.model_dump() | {"status": "created", "modified_at": datetime.datetime.now(),}
+                analysis_payload.model_dump()
+                | {
+                    "status": "created",
+                    "modified_at": datetime.datetime.now(),
+                }
             )
         )
 

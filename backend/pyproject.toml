@@ -31,7 +31,7 @@ dependencies = [
 plugins = ['pydantic.mypy']
 
 [[tool.mypy.overrides]]
-module = "backend.*"
+module = ["backend.*", "ffmpeg.*"]
 ignore_missing_imports = true
 
 [tool.ruff]

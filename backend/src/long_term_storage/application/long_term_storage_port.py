@@ -20,5 +20,5 @@ class LongTermStoragePort(abc.ABC):
         from_location: str,
         bucket_name: str,
         to_location: str,
-    ) -> typing.BinaryIO:
+    ) -> str:
         """"""

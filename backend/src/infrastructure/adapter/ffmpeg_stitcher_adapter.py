@@ -4,9 +4,11 @@ import pathlib
 
 import ffmpeg
 
-from long_term_storage.application.long_term_storage_port import LongTermStoragePort
-from settings import Settings
-from stitcher.application.stitcher_port import StitcherPort
+from backend.src.long_term_storage.application.long_term_storage_port import (
+    LongTermStoragePort,
+)
+from backend.src.settings import Settings
+from backend.src.stitcher.application.stitcher_port import StitcherPort
 
 _logger = logging.getLogger(__name__)
 
@@ -71,16 +73,27 @@ class FFMpegStitcherAdapter(StitcherPort):
 
         return video_url
 
-    def _render_video(self, video_name: str, frames_location: str,) -> None:
+    def _render_video(
+        self,
+        video_name: str,
+        frames_location: str,
+    ) -> None:
         (
-            ffmpeg
-            .input(f"{frames_location}/*.jpg", pattern_type="glob", framerate=30)
+            ffmpeg.input(f"{frames_location}/*.jpg", pattern_type="glob", framerate=30)
             .filter("scale", "min(1920,iw)", "-2")
-            .output(video_name, vcodec="libx264", pix_fmt="yuv420p",)
+            .output(
+                video_name,
+                vcodec="libx264",
+                pix_fmt="yuv420p",
+            )
             .run()
         )
 
-    async def store_video(self, video_name: str, naming_strategy: str,) -> str:
+    async def store_video(
+        self,
+        video_name: str,
+        naming_strategy: str,
+    ) -> str:
         file = await asyncio.to_thread(open, video_name, "rb")
         try:
             video_url = await self.long_term_storage_port.store_file(

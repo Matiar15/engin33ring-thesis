@@ -1,6 +1,8 @@
 import datetime
 import logging
 import typing
+from typing import Any
+
 import bson
 
 from pymongo.asynchronous.collection import AsyncCollection
@@ -102,7 +104,7 @@ class MongoAnalysisAdapter(AnalysisPort):
 
     @staticmethod
     def _update_criteria(**kwargs: typing.Any) -> dict[str, typing.Any]:
-        updates = {"$set": {}}
+        updates: dict[str, dict[typing.Any, typing.Any]] = {"$set": {}}
         updates["$set"].update({"modified_at": datetime.datetime.now().isoformat()})
 
         frame = kwargs.pop("frame", None)

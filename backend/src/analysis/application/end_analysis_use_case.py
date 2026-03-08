@@ -1,9 +1,9 @@
 import datetime
 import logging
 
-from analysis.api.model import EndAnalysisPayload
+from backend.src.analysis.api.model import EndAnalysisPayload
 from backend.src.analysis.application.analysis_port import AnalysisPort
-from stitcher.application.stitcher_port import StitcherPort
+from backend.src.stitcher.application.stitcher_port import StitcherPort
 
 _logger = logging.getLogger(__name__)
 
@@ -42,17 +42,24 @@ class EndAnalysisUseCase:
 
             analysis = leftover_analysis
 
+        if not analysis.frames:
+            raise ValueError(
+                f"No frames found for analysis with id: {analysis_payload.id}."
+            )
+
         frame_urls = [(frame.id, frame.frame_url) for frame in analysis.frames]
 
         _logger.info(f"Stitching frames...")
         video = await self.stitcher_port.stitch(
-            video_name=analysis.id,
+            video_name=analysis.id,  # type: ignore
             user_id=analysis.user_id,
-            frames=frame_urls
+            frames=frame_urls,
         )
 
         await self.analysis_port.update(
-            id=analysis.id, status="completed", video_url=video
+            id=analysis.id,  # type: ignore
+            status="completed",
+            video_url=video,
         )
 
         _logger.info(f"Analysis ended!")

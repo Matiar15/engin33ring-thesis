@@ -28,9 +28,7 @@ class RustFSLongTermStorageAdapter(LongTermStoragePort):
             Fileobj=file,
             Bucket=bucket_name,
             Key=object_name,
-            ExtraArgs={
-                "ContentType": "image/jpeg" if format == "jpg" else "video/mp4"
-            },
+            ExtraArgs={"ContentType": "image/jpeg" if format == "jpg" else "video/mp4"},
         )
 
         return object_name
@@ -43,10 +41,15 @@ class RustFSLongTermStorageAdapter(LongTermStoragePort):
         to_location: str,
     ) -> str:
         def _download(file_id_: str) -> str:
-            fully_qualified_to_location = f"{to_location}/{file_id_}_{str(uuid.uuid4())}.jpg"
+            fully_qualified_to_location = (
+                f"{to_location}/{file_id_}_{str(uuid.uuid4())}.jpg"
+            )
             with open(fully_qualified_to_location, "wb") as f:
-                self.client.download_fileobj(Bucket=bucket_name, Key=from_location, Fileobj=f)
-                return fully_qualified_to_location
+                self.client.download_fileobj(  # type: ignore
+                    Bucket=bucket_name, Key=from_location, Fileobj=f
+                )
+
+            return fully_qualified_to_location
 
         return await asyncio.to_thread(
             _download,
