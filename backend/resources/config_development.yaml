@@ -16,3 +16,7 @@ logging:
 
 otel:
   endpoint: "http://localhost:4318"
+
+stitcher:
+  temporary_dir: "/home/matiar/Programming/engin33ring-thesis/backend/resources/stitcher"
+  bucket_name: "engin33ring-thesis-videos"
