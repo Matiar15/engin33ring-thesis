@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 import io
 import fastapi
@@ -39,7 +40,10 @@ async def test_create_frame_success(use_case, mock_analysis_port, mock_storage_p
 
     # Mock finding existing analysis
     mock_analysis_port.get_one.return_value = Analysis(
-        _id="analysis_abc", user_id="user123", status="created"
+        id="analysis_abc",
+        user_id="user123",
+        status="created",
+        modified_at=datetime.now(),
     )
 
     # Mock file storage

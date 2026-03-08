@@ -36,3 +36,4 @@ async def test_create_analysis_success(use_case, mock_analysis_port):
     assert isinstance(call_args, Analysis)
     assert call_args.user_id == "user_123"
     assert call_args.status == "created"
+    assert call_args.modified_at is not None

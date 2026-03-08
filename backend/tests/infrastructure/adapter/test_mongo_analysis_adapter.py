@@ -29,7 +29,7 @@ def adapter(mock_db):
 @pytest.mark.asyncio
 async def test_create_analysis(adapter, mock_collection):
     # Given
-    analysis = Analysis(user_id="user123", status="pending")
+    analysis = Analysis(user_id="user123", status="pending", modified_at=datetime.now())
     mock_collection.insert_one.return_value = MagicMock(inserted_id=bson.ObjectId())
 
     # When
@@ -53,6 +53,7 @@ async def test_get_one_found(adapter, mock_collection):
         "_id": obj_id,
         "user_id": user_id,
         "status": "completed",
+        "modified_at": datetime.now().isoformat(),
         "frames": [],
     }
 
@@ -79,6 +80,7 @@ async def test_get_one_with_statuses(adapter, mock_collection):
         "_id": obj_id,
         "user_id": user_id,
         "status": "completed",
+        "modified_at": datetime.now().isoformat(),
     }
 
     # When
@@ -101,9 +103,11 @@ async def test_update_status(adapter, mock_collection):
     await adapter.update(id_str, status=new_status)
 
     # Then
-    mock_collection.update_one.assert_called_once_with(
-        filter={"_id": obj_id}, update={"$set": {"status": new_status}}
-    )
+    mock_collection.update_one.assert_called_once()
+    call_args = mock_collection.update_one.call_args[1]
+    assert call_args["filter"] == {"_id": obj_id}
+    assert call_args["update"]["$set"]["status"] == new_status
+    assert "modified_at" in call_args["update"]["$set"]
 
 
 @pytest.mark.asyncio
