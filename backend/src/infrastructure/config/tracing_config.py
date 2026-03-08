@@ -15,12 +15,12 @@ def tracing_config() -> None:
     _logger.info("Initializing tracing...")
 
     resource = Resource.create({SERVICE_NAME: settings.application_name})
-    
+
     provider = TracerProvider(resource=resource)
     processor = BatchSpanProcessor(
         OTLPSpanExporter(endpoint=f"{settings.otel.endpoint}/v1/traces")
     )
     provider.add_span_processor(processor)
     trace.set_tracer_provider(provider)
-    
+
     _logger.info("Tracing initialized.")

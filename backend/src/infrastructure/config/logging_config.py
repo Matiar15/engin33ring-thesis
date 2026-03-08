@@ -22,7 +22,9 @@ def logging_config() -> None:
     )
     logger_provider.add_log_record_processor(BatchLogRecordProcessor(otlp_exporter))
 
-    otlp_handler = LoggingHandler(level=logging.getLevelName(logging_level), logger_provider=logger_provider)
+    otlp_handler = LoggingHandler(
+        level=logging.getLevelName(logging_level), logger_provider=logger_provider
+    )
 
     logging.config.dictConfig(
         {
