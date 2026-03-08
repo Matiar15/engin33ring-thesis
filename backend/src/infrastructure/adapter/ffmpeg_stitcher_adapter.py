@@ -7,8 +7,8 @@ import ffmpeg
 from backend.src.long_term_storage.application.long_term_storage_port import (
     LongTermStoragePort,
 )
-from backend.src.settings import Settings
 from backend.src.stitcher.application.stitcher_port import StitcherPort
+from backend.src.settings import Settings
 
 _logger = logging.getLogger(__name__)
 
@@ -16,8 +16,8 @@ _logger = logging.getLogger(__name__)
 class FFMpegStitcherAdapter(StitcherPort):
     def __init__(
         self,
-        settings: Settings,
         long_term_storage_port: LongTermStoragePort,
+        settings: Settings,
     ):
         self.long_term_storage_port = long_term_storage_port
         self.temporary_storage = settings.stitcher.temporary_dir

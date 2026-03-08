@@ -1,7 +1,7 @@
 import typing
 import fastapi
 
-from analysis.application.end_analysis_use_case import EndAnalysisUseCase
+from backend.src.analysis.application.end_analysis_use_case import EndAnalysisUseCase
 from backend.src.analysis.api.model import CreateAnalysisPayload, EndAnalysisPayload
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,

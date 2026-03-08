@@ -49,7 +49,10 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     long_term_storage_port = RustFSLongTermStorageAdapter(long_term_storage_client)
     _logger.info("Initialized long term storage port.")
 
-    stitcher_port = FFMpegStitcherAdapter(settings, long_term_storage_port)
+    stitcher_port = FFMpegStitcherAdapter(
+        long_term_storage_port,
+        settings,
+    )
     _logger.info("Initialized stitcher port.")
 
     create_frame_use_case = CreateFrameUseCase(
