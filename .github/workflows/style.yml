@@ -2,26 +2,60 @@ name: Style
 on: [push]
 
 jobs:
+  Backend-Checks:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.verify.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: verify
+        uses: ./.github/actions/verify_changes
+        with:
+          directory: backend
+
+  Frontend-Checks:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.verify.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: verify
+        uses: ./.github/actions/verify_changes
+        with:
+          directory: frontend
+
   Backend:
     runs-on: ubuntu-latest
+    needs: Backend-Checks
+    if: needs.Backend-Checks.outputs.changes == 'true'
+
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.13
+          python-version: "3.13"
+
       - uses: astral-sh/setup-uv@v5
+
       - run: |
           make backend-lint
           make mypy
 
   Frontend:
     runs-on: ubuntu-latest
+    needs: Frontend-Checks
+    if: needs.Frontend-Checks.outputs.changes == 'true'
+
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6.2.0
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - run: |
-          npm install --prefix frontend
-          make front-lint
-          
+          make frontend-install
+          make frontend-lint
