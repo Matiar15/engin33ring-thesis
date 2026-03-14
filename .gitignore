@@ -302,3 +302,4 @@ cython_debug/
 
 node_modules
 backend/resources/prod_development.yaml
+/backend/resources/prod_development.yaml
