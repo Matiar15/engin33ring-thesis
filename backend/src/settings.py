@@ -35,10 +35,10 @@ class StitcherSettings(pydantic.BaseModel):
     bucket_name: str
 
 
-class AuthorizationSettings(pydantic.BaseModel):
+class AuthenticationSettings(pydantic.BaseModel):
     secret: str
     algorithm: str
-    access_token_expire_mins: str
+    access_token_expire_mins: int
 
 
 class Settings(pydantic_settings.BaseSettings):
@@ -46,7 +46,7 @@ class Settings(pydantic_settings.BaseSettings):
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
     stitcher: StitcherSettings
-    authorization: AuthorizationSettings
+    authentication: AuthenticationSettings
     logging: LoggingSettings = LoggingSettings()
     otel: OTELSettings = OTELSettings()
 
