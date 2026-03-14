@@ -1,0 +1,25 @@
+name: "Verify Changes"
+author: Matiar15
+description: Verifies, if and changes were made to the directory set by input
+inputs:
+  directory:
+    description: "Directory to verify"
+    required: true
+
+outputs:
+  changes:
+    description: Whether changes exist
+    value: ${{ steps.check.outputs.changes }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for changes
+      id: check
+      shell: bash
+      run: |
+        if [[ -n "$(git status --porcelain "${{ inputs.directory }}")" ]]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
