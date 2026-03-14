@@ -1,7 +1,6 @@
 import datetime
 import logging
 import typing
-from typing import Any
 
 import bson
 
