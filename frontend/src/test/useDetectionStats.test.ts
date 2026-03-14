@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useDetectionStats } from '@/features/analysis/hooks/useDetectionStats';
+import { useDetectionStats } from '@/features/analysis/hooks/useDetectionStats.ts';
 
 const makeLog = (id: string, confidence: number) => ({
   id,

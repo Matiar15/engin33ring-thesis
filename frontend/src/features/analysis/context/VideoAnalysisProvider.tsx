@@ -1,7 +1,7 @@
 import { useReducer, useCallback, useRef, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { VideoAnalysisContext } from './VideoAnalysisContext';
-import { videoAnalysisReducer, initialVideoAnalysisState } from './videoAnalysisReducer';
+import { VideoAnalysisContext } from './VideoAnalysisContext.tsx';
+import { videoAnalysisReducer, initialVideoAnalysisState } from './videoAnalysisReducer.ts';
 import { generateMockDetection, generateMockBoundingBox } from '@/features/analysis/mocks';
 
 interface VideoAnalysisProviderProps {

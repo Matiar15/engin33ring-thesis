@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import VideoPlayer from '@/features/analysis/components/VideoPlayer';
+import VideoPlayer from '@/features/analysis/components/VideoPlayer.tsx';
 
 vi.mock('@/features/analysis/context', () => ({
   useVideoAnalysis: () => ({

@@ -1,6 +1,6 @@
 import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
-import { useVideoControls } from '@/features/analysis/hooks/useVideoControls';
-import { useBoundingBoxOverlay } from '@/features/analysis/hooks/useBoundingBoxOverlay';
+import { useVideoControls } from '@/features/analysis/hooks/useVideoControls.ts';
+import { useBoundingBoxOverlay } from '@/features/analysis/hooks/useBoundingBoxOverlay.ts';
 import { useVideoAnalysis } from '@/features/analysis/context';
 import VideoPlayerProcessingIndicator from "@/features/analysis/components/VideoPlayerProcessingIndicator.tsx";
 

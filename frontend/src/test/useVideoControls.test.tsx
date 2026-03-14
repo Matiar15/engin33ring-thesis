@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useVideoControls } from '@/features/analysis/hooks/useVideoControls';
+import { useVideoControls } from '@/features/analysis/hooks/useVideoControls.ts';
 
 const TestHarness = ({ onPlay, onPause }: { onPlay?: () => void; onPause?: () => void }) => {
   const { videoRef, togglePlay, currentTime, progress } = useVideoControls({ onPlay, onPause });

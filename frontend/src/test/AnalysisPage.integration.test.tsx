@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import AnalysisPage from '@/pages/AnalysisPage';
+import AnalysisPage from '@/pages/AnalysisPage.tsx';
 import { VideoAnalysisProvider } from '@/features/analysis/context';
 
 const renderAnalysis = () => {

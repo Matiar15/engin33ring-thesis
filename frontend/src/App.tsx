@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "@/components/NotFound.tsx";
-import { Toaster } from "@/components/sonner";
+import { Toaster } from "@/components/sonner.tsx";
 import AuthPage from "@/pages/AuthPage.tsx";
 import RegistryPage from "@/pages/RegistryPage.tsx";
 import AnalysisPage from "@/pages/AnalysisPage.tsx";

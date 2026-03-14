@@ -1,5 +1,5 @@
 import {DetectionLog} from "@/features/analysis/types";
-import {useDetectionStats} from '@/features/analysis/hooks/useDetectionStats';
+import {useDetectionStats} from '@/features/analysis/hooks/useDetectionStats.ts';
 import DetectionHeader from "@/features/analysis/components/DetectionHeader.tsx";
 import DetectionStats from "@/features/analysis/components/DetectionStats.tsx";
 import DetectionLogSection from "@/features/analysis/components/DetectionLogSection.tsx";

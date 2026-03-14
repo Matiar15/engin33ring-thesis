@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   videoAnalysisReducer,
   initialVideoAnalysisState,
-} from '@/features/analysis/context/videoAnalysisReducer';
+} from '@/features/analysis/context/videoAnalysisReducer.ts';
 
 const sampleDetection = {
   id: 'd1',

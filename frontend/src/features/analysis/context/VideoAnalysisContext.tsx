@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { VideoAnalysisState } from './videoAnalysisReducer';
+import { VideoAnalysisState } from './videoAnalysisReducer.ts';
 
 // Context Value
 export interface VideoAnalysisContextValue {
@@ -26,5 +26,5 @@ export function useVideoAnalysis() {
 }
 
 // Re-export types for convenience
-export type { VideoAnalysisState, VideoAnalysisAction } from './videoAnalysisReducer';
+export type { VideoAnalysisState, VideoAnalysisAction } from './videoAnalysisReducer.ts';
 

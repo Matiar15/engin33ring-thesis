@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { useFileDrop } from '@/features/analysis/hooks/useFileDrop';
-import VideoUploader from '@/features/analysis/components/VideoUploader';
+import { useFileDrop } from '@/features/analysis/hooks/useFileDrop.ts';
+import VideoUploader from '@/features/analysis/components/VideoUploader.tsx';
 
 vi.mock('@/features/analysis/hooks/useFileDrop', () => ({
   useFileDrop: vi.fn(),

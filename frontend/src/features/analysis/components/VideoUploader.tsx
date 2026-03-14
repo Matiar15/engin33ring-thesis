@@ -1,5 +1,5 @@
 import { Upload, Film, AlertCircle } from 'lucide-react';
-import { useFileDrop } from '@/features/analysis/hooks/useFileDrop';
+import { useFileDrop } from '@/features/analysis/hooks/useFileDrop.ts';
 
 const SUPPORTED_VIDEO_CODECS = [
 	'video/mp4; codecs="avc1.42E01E, mp4a.40.2"',
