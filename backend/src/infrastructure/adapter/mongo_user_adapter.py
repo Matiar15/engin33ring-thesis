@@ -9,12 +9,13 @@ from backend.src.user.domain.user import User
 
 _logger = logging.getLogger(__name__)
 
+
 class MongoUserAdapter(UserPort):
     def __init__(
         self,
         client: AsyncDatabase[typing.Mapping[str, typing.Any] | typing.Any],
     ):
-        self.client: AsyncCollection[User] = client["user"] # type: ignore
+        self.client: AsyncCollection[User] = client["user"]  # type: ignore
 
     async def create(
         self,
@@ -25,7 +26,7 @@ class MongoUserAdapter(UserPort):
             user.model_dump(
                 by_alias=True,
                 exclude_unset=True,
-            ) # type: ignore
+            )  # type: ignore
         )
 
         inserted_id = str(insert_one_result.inserted_id)
@@ -46,7 +47,6 @@ class MongoUserAdapter(UserPort):
             return None
 
         return User.model_validate(user)
-
 
     async def fetch_for_token(self, email: str) -> User | None:
         _logger.info("Fetching user with email: %s..." % email)

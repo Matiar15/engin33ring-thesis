@@ -1,4 +1,6 @@
-from backend.src.authentication.application.authentication_port import AuthenticationPort
+from backend.src.authentication.application.authentication_port import (
+    AuthenticationPort,
+)
 from backend.src.hasher.application.hasher_port import HasherPort
 from backend.src.user.application.user_port import UserPort
 
@@ -13,7 +15,10 @@ class AuthenticationAdapter(AuthenticationPort):
         self.password_hasher = password_hasher
 
     async def authenticate(
-        self, email: str, hashed_password: str, token: str,
+        self,
+        email: str,
+        hashed_password: str,
+        token: str,
     ) -> bool:
         user = await self.user_port.fetch(email, hashed_password)
 

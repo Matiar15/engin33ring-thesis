@@ -10,6 +10,7 @@ from backend.src.user.application.user_port import UserPort
 
 _logger = logging.getLogger(__name__)
 
+
 class JWTTokenAdapter(TokenPort):
     def __init__(
         self,
@@ -37,12 +38,13 @@ class JWTTokenAdapter(TokenPort):
     async def verify_token(self, token: Token) -> bool:
         try:
             _logger.info("Verifying access token...")
-            token = jwt.decode(token.access_token, self.secret, algorithms=[self.algorithm])
+            token = jwt.decode(
+                token.access_token, self.secret, algorithms=[self.algorithm]
+            )
             email = token.get("sub")
         except jwt.PyJWTError:
             _logger.info("Invalid access token.")
             return False
-
 
         user = self.user_port.fetch_for_token(email)
 

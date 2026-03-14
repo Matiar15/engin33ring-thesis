@@ -1,5 +1,6 @@
 import abc
 
+
 class AuthenticationPort(abc.ABC):
     @abc.abstractmethod
     async def authenticate(

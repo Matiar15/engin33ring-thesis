@@ -28,7 +28,8 @@ class CreateUserUseCase:
             _logger.info("Creating user with login: %s..." % payload.login)
             await self.user_port.create(
                 User.from_payload(
-                    payload.model_dump() | {
+                    payload.model_dump()
+                    | {
                         "password": hashed_pwd,
                         "modified_at": datetime.datetime.now(),
                     }

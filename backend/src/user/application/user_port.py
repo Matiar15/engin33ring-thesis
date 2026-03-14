@@ -20,7 +20,5 @@ class UserPort(abc.ABC):
         """"""
 
     @abc.abstractmethod
-    async def fetch_for_token(
-        self, email: str
-    ) -> User | None:
+    async def fetch_for_token(self, email: str) -> User | None:
         """"""
