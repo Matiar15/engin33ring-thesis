@@ -301,3 +301,5 @@ cython_debug/
 !/.idea/prettier.xml
 
 node_modules
+backend/resources/prod_development.yaml
+/backend/resources/prod_development.yaml
