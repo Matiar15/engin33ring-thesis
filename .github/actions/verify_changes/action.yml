@@ -26,9 +26,9 @@ runs:
       run: |
         echo "Checking directory: ${{ inputs.directory }}"
         echo "Changed files:"
-        git diff --name-only origin/${{ github.base_ref }}...HEAD
-        
-        if [[ -n "$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- "${{ inputs.directory }}")" ]]; then
+        git diff --name-only origin/${{ github.base_ref }}..HEAD -- "${{ inputs.directory }}"
+
+        if [[ -n "$(git diff --name-only origin/${{ github.base_ref }}..HEAD -- "${{ inputs.directory }}")" ]]; then
           echo "Changes detected"
           echo "changes=true" >> $GITHUB_OUTPUT
         else
