@@ -32,3 +32,28 @@ class MongoUserAdapter(UserPort):
         _logger.info("User created with id: %s" % inserted_id)
 
         return inserted_id
+
+    async def fetch(self, email: str, hashed_password: str) -> User | None:
+        _logger.info("Fetching user with email: %s..." % email)
+        user = await self.client.find_one(
+            {
+                "email": email,
+                "password": hashed_password,
+            }
+        )
+        if not user:
+            _logger.info("User not found.")
+            return None
+
+        return User.model_validate(user)
+
+
+    async def fetch_for_token(self, email: str) -> User | None:
+        _logger.info("Fetching user with email: %s..." % email)
+        user = await self.client.find_one({"email": email})
+
+        if not user:
+            _logger.info("User not found.")
+            return None
+
+        return User.model_validate(user)

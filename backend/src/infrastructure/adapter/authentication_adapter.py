@@ -13,14 +13,14 @@ class AuthenticationAdapter(AuthenticationPort):
         self.password_hasher = password_hasher
 
     async def authenticate(
-        self, email: str, password: str, token: str,
+        self, email: str, hashed_password: str, token: str,
     ) -> bool:
-        user = await self.user_port.fetch(email, password)
+        user = await self.user_port.fetch(email, hashed_password)
 
         if not user:
             raise Exception("Invalid credentials.")
 
-        if not self.password_hasher.verify(password, user.password):
+        if not self.password_hasher.verify(hashed_password, user.password):
             return False
 
         return True
