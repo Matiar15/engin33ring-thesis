@@ -10,6 +10,8 @@ from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
 )
+from backend.src.infrastructure.adapter.hasher_adapter import HasherAdapter
+from backend.src.infrastructure.adapter.mongo_user_adapter import MongoUserAdapter
 from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import (
     RustFSLongTermStorageAdapter,
 )
@@ -29,6 +31,7 @@ from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+from backend.src.user.application.create_user_use_case import CreateUserUseCase
 
 logging_config()
 tracing_config()
@@ -68,11 +71,16 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
         analysis_port=analysis_port,
         stitcher_port=stitcher_port,
     )
+    create_user_use_case = CreateUserUseCase(
+        user_port=MongoUserAdapter(mongo_client),
+        password_hasher=HasherAdapter(),
+    )
     _logger.info("Initialized use cases.")
 
     app.state.create_frame_use_case = create_frame_use_case
     app.state.create_analysis_use_case = create_analysis_use_case
     app.state.end_analysis_use_case = end_analysis_use_case
+    app.state.create_user_use_case = create_user_use_case
 
     _logger.info("Application started.")
     yield
