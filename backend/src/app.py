@@ -5,6 +5,7 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
+from backend.src.analysis.application.end_analysis_use_case import EndAnalysisUseCase
 from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
@@ -14,6 +15,9 @@ from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import 
 )
 from backend.src.infrastructure.adapter.mongo_analysis_adapter import (
     MongoAnalysisAdapter,
+)
+from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import (
+    FFMpegStitcherAdapter,
 )
 from backend.src.infrastructure.config.logging_config import logging_config
 from backend.src.infrastructure.config.tracing_config import tracing_config
@@ -47,6 +51,12 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     long_term_storage_port = RustFSLongTermStorageAdapter(long_term_storage_client)
     _logger.info("Initialized long term storage port.")
 
+    stitcher_port = FFMpegStitcherAdapter(
+        long_term_storage_port,
+        settings,
+    )
+    _logger.info("Initialized stitcher port.")
+
     create_frame_use_case = CreateFrameUseCase(
         analysis_port=analysis_port,
         long_term_storage_port=long_term_storage_port,
@@ -54,10 +64,15 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     create_analysis_use_case = CreateAnalysisUseCase(
         analysis_port=analysis_port,
     )
+    end_analysis_use_case = EndAnalysisUseCase(
+        analysis_port=analysis_port,
+        stitcher_port=stitcher_port,
+    )
     _logger.info("Initialized use cases.")
 
     app.state.create_frame_use_case = create_frame_use_case
     app.state.create_analysis_use_case = create_analysis_use_case
+    app.state.end_analysis_use_case = end_analysis_use_case
 
     _logger.info("Application started.")
     yield

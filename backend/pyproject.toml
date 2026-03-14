@@ -24,13 +24,14 @@ dependencies = [
     "opentelemetry-exporter-otlp>=1.30.0",
     "opentelemetry-instrumentation-logging>=0.51b0",
     "opentelemetry-instrumentation-fastapi>=0.51b0",
+    "ffmpeg-python>=0.2.0",
 ]
 
 [tool.mypy]
 plugins = ['pydantic.mypy']
 
 [[tool.mypy.overrides]]
-module = "backend.*"
+module = ["backend.*", "ffmpeg.*"]
 ignore_missing_imports = true
 
 [tool.ruff]

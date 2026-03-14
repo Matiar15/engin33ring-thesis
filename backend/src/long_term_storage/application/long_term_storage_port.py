@@ -9,5 +9,16 @@ class LongTermStoragePort(abc.ABC):
         file: typing.BinaryIO,
         bucket_name: str,
         naming_strategy: str,
+        format: str,
     ) -> str:
         """Store a file in the long-term storage database."""
+
+    @abc.abstractmethod
+    async def download_file(
+        self,
+        file_id: str,
+        from_location: str,
+        bucket_name: str,
+        to_location: str,
+    ) -> str:
+        """"""

@@ -30,10 +30,16 @@ class OTELSettings(pydantic.BaseModel):
     endpoint: str = "http://localhost:4318"
 
 
+class StitcherSettings(pydantic.BaseModel):
+    temporary_dir: str
+    bucket_name: str
+
+
 class Settings(pydantic_settings.BaseSettings):
     application_name: str = "engin33ring-thesis"
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
+    stitcher: StitcherSettings
     logging: LoggingSettings = LoggingSettings()
     otel: OTELSettings = OTELSettings()
 
@@ -60,9 +66,6 @@ class Settings(pydantic_settings.BaseSettings):
         )
 
 
-settings = Settings()
-
-
 @functools.lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return settings
+    return Settings()
