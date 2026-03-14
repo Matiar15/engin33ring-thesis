@@ -41,7 +41,7 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     _logger.info("Starting application...")
     settings = get_settings()
 
-    mongo_client = mongo_config(settings)
+    mongo_client = await mongo_config(settings)
     long_term_storage_client = rustfs_config(settings)
     _logger.info("Initialized database ports.")
 
