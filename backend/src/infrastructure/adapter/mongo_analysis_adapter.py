@@ -1,7 +1,6 @@
 import datetime
 import logging
 import typing
-from typing import Any
 
 import bson
 
@@ -53,6 +52,9 @@ class MongoAnalysisAdapter(AnalysisPort):
 
         if analysis:
             _logger.info("Analysis found: %s" % analysis)
+        else:
+            _logger.info("Analysis not found.")
+            return None
 
         return Analysis.model_validate(analysis)
 
