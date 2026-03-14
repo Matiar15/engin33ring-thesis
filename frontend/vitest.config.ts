@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
-// @ts-ignore
+// @ts-expect-error: IDK why it is like that, but it does not impact application startup.
 import path from "path";
 
 export default defineConfig({

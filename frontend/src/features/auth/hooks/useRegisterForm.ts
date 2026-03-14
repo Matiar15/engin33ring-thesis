@@ -1,15 +1,15 @@
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useState} from "react";
 import {AuthTab} from "@/features/auth/types";
 import {useNavigate} from "react-router-dom";
 
 export function useRegisterForm() {
     const navigate = useNavigate();
 
-    const onLogin = () => {
+    const onLogin = useCallback(() => {
         // W prawdziwej aplikacji tu byłaby logika autoryzacji
         // Na razie po prostu przekierowujemy do dashboardu
         navigate('/analysis');
-    };
+    }, [navigate]);
 
     const [activeTab, setActiveTab] = useState<AuthTab>('login');
     const [showPassword, setShowPassword] = useState(false);
