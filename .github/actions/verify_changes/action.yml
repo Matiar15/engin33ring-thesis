@@ -15,20 +15,25 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Fetch base branch
-      shell: bash
-      run: |
-        git fetch origin ${{ github.base_ref }}
-
     - name: Check for changes
       id: check
       shell: bash
       run: |
+        BASE=${{ github.base_ref }}
+        if [[ -z "$BASE" ]]; then
+          echo "No base branch provided, using master"
+          BASE="master"
+        else
+          echo "Base branch: $BASE"
+        fi
+
+        git fetch origin $BASE
+
         echo "Checking directory: ${{ inputs.directory }}"
         echo "Changed files:"
-        git diff --name-only origin/${{ github.base_ref }}..HEAD -- "${{ inputs.directory }}"
+        git diff --name-only origin/$BASE..HEAD -- "${{ inputs.directory }}"
 
-        if [[ -n "$(git diff --name-only origin/${{ github.base_ref }}..HEAD -- "${{ inputs.directory }}")" ]]; then
+        if [[ -n "$(git diff --name-only origin/$BASE..HEAD -- "${{ inputs.directory }}")" ]]; then
           echo "Changes detected"
           echo "changes=true" >> $GITHUB_OUTPUT
         else
