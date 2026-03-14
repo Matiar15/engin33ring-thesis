@@ -9,13 +9,18 @@ backend-lint:
 mypy:
 	PYTHONPATH=$(shell pwd) uv run --directory $(backend_dir) mypy .
 
-tests:
+backend-test:
 	PYTHONPATH=$(shell pwd) uv run --directory $(backend_dir) pytest -v
 
 front-lint:
-	npm run --prefix $(frontend_dir) lint:eslint && npm run --prefix $(frontend_dir) lint:stylelint && npm run --prefix $(frontend_dir) lint:prettier
+	npm run --prefix $(frontend_dir) lint
+
+frontend-test:
+	npm run --prefix $(frontend_dir) test
 
 all-done:
 	@echo "ALL DONE!"
 
 lint: backend-lint mypy front-lint all-done
+
+test: backend-test frontend-test all-done
