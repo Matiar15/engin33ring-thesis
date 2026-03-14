@@ -34,12 +34,17 @@ class StitcherSettings(pydantic.BaseModel):
     temporary_dir: str
     bucket_name: str
 
+class AuthorizationSettings(pydantic.BaseModel):
+    secret: str
+    algorithm: str
+    access_token_expire_mins: str
 
 class Settings(pydantic_settings.BaseSettings):
     application_name: str = "engin33ring-thesis"
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
     stitcher: StitcherSettings
+    authorization: AuthorizationSettings
     logging: LoggingSettings = LoggingSettings()
     otel: OTELSettings = OTELSettings()
 
