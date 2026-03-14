@@ -10,7 +10,7 @@ long_term_storage:
   password: useruseruser
 
 authentication:
-  secret: "e7637b17bd5d6f614a8bc5d9043e87e0cf62cf877495ceca86fdf2e160fd6e36"
+  secret: "e7637b17bd5d6f614a8bc5d9043e87e0cf62cf877495ceca86fdf2e160fd6e36" # openssl rand -hex 32
   algorithm: HS256
   access_token_expire_mins: 30
 
