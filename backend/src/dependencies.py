@@ -22,6 +22,7 @@ def get_end_analysis_use_case(request: fastapi.Request) -> EndAnalysisUseCase:
     use_case: EndAnalysisUseCase = request.app.state.end_analysis_use_case
     return use_case
 
+
 def get_create_user_use_case(request: fastapi.Request) -> CreateUserUseCase:
     use_case: CreateUserUseCase = request.app.state.create_user_use_case
     return use_case

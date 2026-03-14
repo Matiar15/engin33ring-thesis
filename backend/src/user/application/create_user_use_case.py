@@ -6,6 +6,7 @@ from backend.src.user.application.user_port import UserPort
 
 _logger = logging.getLogger(__name__)
 
+
 class CreateUserUseCase:
     def __init__(
         self,
