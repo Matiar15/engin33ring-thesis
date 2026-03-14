@@ -22,7 +22,7 @@
     "noImplicitAny": false,
     "noFallthroughCasesInSwitch": false,
 
-    "baseUrl": "../engin33ring-thesis-front",
+    "baseUrl": "../frontend",
     "paths": {
       "@/*": ["./src/*"]
     }
