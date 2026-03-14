@@ -1,25 +1,37 @@
-name: "Verify Changes"
+name: Verify changes
 author: Matiar15
-description: Verifies, if and changes were made to the directory set by input
+description: Checks if a directory has changes in the current PR
+
 inputs:
   directory:
-    description: "Directory to verify"
+    description: Directory to verify
     required: true
 
 outputs:
   changes:
-    description: Whether changes exist
+    description: Whether changes were detected
     value: ${{ steps.check.outputs.changes }}
 
 runs:
   using: "composite"
   steps:
+    - name: Fetch base branch
+      shell: bash
+      run: |
+        git fetch origin ${{ github.base_ref }}
+
     - name: Check for changes
       id: check
       shell: bash
       run: |
-        if [[ -n "$(git status --porcelain "${{ inputs.directory }}")" ]]; then
+        echo "Checking directory: ${{ inputs.directory }}"
+        echo "Changed files:"
+        git diff --name-only origin/${{ github.base_ref }}...HEAD
+        
+        if [[ -n "$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- "${{ inputs.directory }}")" ]]; then
+          echo "Changes detected"
           echo "changes=true" >> $GITHUB_OUTPUT
         else
+          echo "No changes detected"
           echo "changes=false" >> $GITHUB_OUTPUT
         fi
