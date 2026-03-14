@@ -23,11 +23,12 @@ class JWTTokenAdapter(TokenPort):
 
     async def create_token(self, user_id: str) -> Token:
         _logger.info("Creating access token for user: %s..." % user_id)
-        expires_in = datetime.datetime.now() + datetime.timedelta(minutes=self.token_ttl)
+        now = datetime.datetime.now()
+        expires_in = now + datetime.timedelta(minutes=self.token_ttl)
         access_token = {
             "sub": user_id,
             "exp": expires_in,
-            "iat": datetime.datetime.now(),
+            "iat": now,
         }
         encoded_jwt = jwt.encode(access_token, self.secret, algorithm=self.algorithm)
         _logger.info("Access token created for user: %s" % user_id)
