@@ -18,6 +18,9 @@ front-lint:
 frontend-test:
 	npm run --prefix $(frontend_dir) test
 
+frontend-install:
+	npm i --prefix $(frontend_dir)
+
 all-done:
 	@echo "ALL DONE!"
 
