@@ -2,6 +2,7 @@ import pwdlib
 
 from backend.src.hasher.application.hasher_port import HasherPort
 
+
 class HasherAdapter(HasherPort):
     def __init__(
         self,
