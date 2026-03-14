@@ -1,20 +1,25 @@
-### react template
-.DS_*
-*.log
-logs
-**/*.backup.*
-**/*.back.*
+// Source - https://stackoverflow.com/a/53819962
+// Posted by Ulysse BN
+// Retrieved 2026-03-14, License - CC BY-SA 4.0
 
+.DS_Store
 node_modules
-bower_components
+/dist
 
-*.sublime*
+# local env files
+.env.local
+.env.*.local
 
-psd
-thumb
-sketch
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-node_modules/
-dist/
-build/
-.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*

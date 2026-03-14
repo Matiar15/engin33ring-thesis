@@ -1,0 +1,42 @@
+name: Verify changes
+author: Matiar15
+description: Checks if a directory has changes in the current PR
+
+inputs:
+  directory:
+    description: Directory to verify
+    required: true
+
+outputs:
+  changes:
+    description: Whether changes were detected
+    value: ${{ steps.check.outputs.changes }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for changes
+      id: check
+      shell: bash
+      run: |
+        BASE=${{ github.base_ref }}
+        if [[ -z "$BASE" ]]; then
+          echo "No base branch provided, using master"
+          BASE="master"
+        else
+          echo "Base branch: $BASE"
+        fi
+
+        git fetch origin $BASE
+
+        echo "Checking directory: ${{ inputs.directory }}"
+        echo "Changed files:"
+        git diff --name-only origin/$BASE..HEAD -- "${{ inputs.directory }}"
+
+        if [[ -n "$(git diff --name-only origin/$BASE..HEAD -- "${{ inputs.directory }}")" ]]; then
+          echo "Changes detected"
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "No changes detected"
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
