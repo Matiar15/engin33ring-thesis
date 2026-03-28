@@ -6,7 +6,11 @@ import { initialArchiveData } from '@/mockData.ts';
 
 const RegistryPage = () => {
   const navigate = useNavigate();
-  // TODO: Zastąpić danymi z API
+  // TODO: Replace with API call to fetch user's analysis history
+  // const { data: entries, isLoading } = useQuery({
+  //   queryKey: ['analyses', userId],
+  //   queryFn: () => analysisService.getAnalyses(userId)
+  // });
   const [entries] = useState<ArchiveEntry[]>(initialArchiveData);
 
   return (
