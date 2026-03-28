@@ -1,11 +1,12 @@
 import datetime
 import logging
+import typing
 
 import jwt
 
 from backend.src.settings import Settings
 from backend.src.token.application.token_port import TokenPort
-from backend.src.token.domain.token import Token
+from backend.src.token.api.model import Token
 from backend.src.user.application.user_port import UserPort
 
 _logger = logging.getLogger(__name__)
@@ -38,15 +39,15 @@ class JWTTokenAdapter(TokenPort):
     async def verify_token(self, token: Token) -> bool:
         try:
             _logger.info("Verifying access token...")
-            token = jwt.decode(
+            parsed_token = jwt.decode(
                 token.access_token, self.secret, algorithms=[self.algorithm]
             )
-            email = token.get("sub")
+            email = parsed_token.get("sub")
         except jwt.PyJWTError:
             _logger.info("Invalid access token.")
             return False
 
-        user = self.user_port.fetch_for_token(email)
+        user = self.user_port.fetch_for_token(email or "")
 
         if not user:
             _logger.info("User not found for access token.")
@@ -54,3 +55,10 @@ class JWTTokenAdapter(TokenPort):
 
         _logger.info("Access token verified.")
         return True
+
+    async def parse_token(self, token: Token) -> dict[str, typing.Any]:
+        return jwt.decode(
+            token.access_token,
+            self.secret,
+            algorithms=[self.algorithm],
+        )

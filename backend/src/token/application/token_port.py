@@ -1,4 +1,5 @@
 import abc
+import typing
 
 from backend.src.token.api.model import Token
 
@@ -16,4 +17,11 @@ class TokenPort(abc.ABC):
         self,
         token: Token,
     ) -> bool:
+        """"""
+
+    @abc.abstractmethod
+    async def parse_token(
+        self,
+        token: Token,
+    ) -> dict[str, typing.Any]:
         """"""

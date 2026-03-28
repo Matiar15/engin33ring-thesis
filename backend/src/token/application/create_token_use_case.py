@@ -2,7 +2,7 @@ import logging
 
 from backend.src.hasher.application.hasher_port import HasherPort
 from backend.src.token.application.token_port import TokenPort
-from backend.src.user.api.model import UserPayload
+from backend.src.token.api.model import LoginPayload
 from backend.src.user.application.user_port import UserPort
 from backend.src.token.api.model import Token
 
@@ -22,17 +22,17 @@ class CreateTokenUseCase:
 
     async def create(
         self,
-        payload: UserPayload,
+        payload: LoginPayload,
     ) -> Token:
         hashed_pwd = await self.password_hasher.hash(payload.password)
 
-        _logger.info("Fetching user with login: %s..." % payload.login)
+        _logger.info("Fetching user with email: %s..." % payload.email)
         user = await self.user_port.fetch(
             email=payload.email,
             hashed_password=hashed_pwd,
         )
         if not user:
-            raise ValueError(f"User with login: {payload.login} was not found.")
+            raise ValueError(f"User with email: {payload.email} was not found.")
 
         _logger.info("User found. Proceeding with token generation...")
 
