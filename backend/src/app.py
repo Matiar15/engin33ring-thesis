@@ -122,6 +122,7 @@ app = fastapi.FastAPI(
     debug=True,
 )
 
+
 @app.exception_handler(ValidationError)
 async def pydantic_validation_exception_handler(request: Request, exc: ValidationError):
     return JSONResponse(
@@ -129,12 +130,14 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
         content={"detail": exc.errors(), "message": "Validation error"},
     )
 
+
 @app.exception_handler(ValueError)
 async def in_app_error_exception_handler(request: Request, exc: ValueError):
     return JSONResponse(
         status_code=400,
         content={"detail": exc.args, "message": "Application error occurred"},
     )
+
 
 app.add_middleware(
     CORSMiddleware,
