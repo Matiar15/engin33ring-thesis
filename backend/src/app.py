@@ -11,6 +11,7 @@ from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
 )
 from backend.src.infrastructure.adapter.hasher_adapter import HasherAdapter
+from backend.src.infrastructure.adapter.jwt_token_adapter import JWTTokenAdapter
 from backend.src.infrastructure.adapter.mongo_user_adapter import MongoUserAdapter
 from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import (
     RustFSLongTermStorageAdapter,
@@ -31,6 +32,7 @@ from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+from backend.src.token.application.create_token_use_case import CreateTokenUseCase
 from backend.src.user.application.create_user_use_case import CreateUserUseCase
 
 logging_config()
@@ -59,6 +61,10 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
         settings,
     )
     _logger.info("Initialized stitcher port.")
+    user_adapter = MongoUserAdapter(mongo_client)
+    _logger.info("Initialized user port.")
+    hasher_port = HasherAdapter()
+    _logger.info("Initialized hasher port.")
 
     create_frame_use_case = CreateFrameUseCase(
         analysis_port=analysis_port,
@@ -72,8 +78,16 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
         stitcher_port=stitcher_port,
     )
     create_user_use_case = CreateUserUseCase(
-        user_port=MongoUserAdapter(mongo_client),
-        password_hasher=HasherAdapter(),
+        user_port=user_adapter,
+        password_hasher=hasher_port,
+    )
+    create_token_use_case = CreateTokenUseCase(
+        user_port=user_adapter,
+        password_hasher=hasher_port,
+        token_port=JWTTokenAdapter(
+            settings=settings,
+            user_port=user_adapter,
+        ),
     )
     _logger.info("Initialized use cases.")
 
@@ -81,6 +95,7 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     app.state.create_analysis_use_case = create_analysis_use_case
     app.state.end_analysis_use_case = end_analysis_use_case
     app.state.create_user_use_case = create_user_use_case
+    app.state.create_token_use_case = create_token_use_case
 
     _logger.info("Application started.")
     yield
