@@ -8,7 +8,7 @@ from backend.src.user.application.create_user_use_case import CreateUserUseCase
 users_router = fastapi.APIRouter(prefix="/users")
 
 
-@users_router.post("/")
+@users_router.post("")
 async def create(
     payload: UserPayload,
     create_user_use_case: typing.Annotated[

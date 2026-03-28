@@ -17,17 +17,17 @@ analysis_router = fastapi.APIRouter(
 )
 
 
-@analysis_router.post("/")
+@analysis_router.post("")
 async def create(
     user_id: typing.Annotated[str, fastapi.Depends(get_current_user)],
     create_analysis_use_case: typing.Annotated[
-        CreateAnalysisUseCase, fastapi.Depends(get_create_analysis_use_case)
+        CreateAnalysisUseCase, fastapi.Depends(get_create_analysis_use_case),
     ],
 ):
     return await create_analysis_use_case.create(user_id)
 
 
-@analysis_router.patch("/")
+@analysis_router.patch("")
 async def end(
     analysis_payload: EndAnalysisPayload,
     user_id: typing.Annotated[str, fastapi.Depends(get_current_user)],

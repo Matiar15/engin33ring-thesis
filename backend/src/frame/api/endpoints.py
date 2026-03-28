@@ -11,7 +11,7 @@ frames_router = fastapi.APIRouter(
 )
 
 
-@frames_router.post("/")
+@frames_router.post("")
 async def create(
     user_id: typing.Annotated[str, fastapi.Depends(get_current_user)],
     analysis_id: typing.Annotated[str, fastapi.Form(...)],
