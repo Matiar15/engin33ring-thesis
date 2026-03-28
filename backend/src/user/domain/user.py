@@ -1,15 +1,17 @@
 import pydantic
+import datetime
 
-from datetime import datetime
+from backend.src.analysis.domain.analysis import PyObjectId
 
 
 class User(pydantic.BaseModel):
-    id: str
+    id: PyObjectId | None = pydantic.Field(alias="_id", default=None)
     login: str
     password: str
     email: str
     full_name: str
-    created_at: datetime
+    created_at: datetime.datetime
+    modified_at: datetime.datetime
 
     model_config = {
         "populate_by_name": True,

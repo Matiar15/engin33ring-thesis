@@ -29,15 +29,18 @@ class CreateTokenUseCase:
         _logger.info("Fetching user with email: %s..." % payload.email)
         user = await self.user_port.fetch(
             email=payload.email,
-            hashed_password=hashed_pwd,
         )
         if not user:
             raise ValueError(f"User with email: {payload.email} was not found.")
 
+        _logger.info("Validating password...")
+        if not await self.password_hasher.verify(payload.password, hashed_pwd):
+            raise ValueError("Invalid password.")
+
         _logger.info("User found. Proceeding with token generation...")
 
-        token = self.token_port.create_token(user_id=user.id)
+        token = await self.token_port.create_token(user_id=user.id)
 
         _logger.info("Token generated.")
 
-        return Token(access_token=token, token_type="bearer")
+        return token

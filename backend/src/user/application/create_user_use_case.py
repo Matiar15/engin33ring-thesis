@@ -32,6 +32,7 @@ class CreateUserUseCase:
                     | {
                         "password": hashed_pwd,
                         "modified_at": datetime.datetime.now(),
+                        "created_at": datetime.datetime.now(),
                     }
                 )
             )
@@ -39,4 +40,4 @@ class CreateUserUseCase:
 
         except Exception as e:
             _logger.error("Failed to create user: %s" % e)
-            raise Exception("Failed to create user. Email already exists.")
+            raise ValueError("Failed to create user. Email already exists.")

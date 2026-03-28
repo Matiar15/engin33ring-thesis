@@ -20,10 +20,10 @@ class AuthenticationAdapter(AuthenticationPort):
         hashed_password: str,
         token: str,
     ) -> bool:
-        user = await self.user_port.fetch(email, hashed_password)
+        user = await self.user_port.fetch(email)
 
         if not user:
-            raise Exception("Invalid credentials.")
+            raise ValueError("Invalid credentials.")
 
         if not self.password_hasher.verify(hashed_password, user.password):
             return False
