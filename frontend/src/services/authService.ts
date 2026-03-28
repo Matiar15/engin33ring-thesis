@@ -25,9 +25,7 @@ export interface AuthService {
 
 export const authService: AuthService = {
   login: async (credentials: LoginRequest) => {
-    // TODO: Backend needs to implement login endpoint
-    // For now, this is a placeholder
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    const response = await apiClient.post<AuthResponse>('/tokens/', credentials);
     apiClient.setToken(response.access_token);
     return response;
   },
