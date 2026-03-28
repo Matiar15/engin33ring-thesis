@@ -39,7 +39,7 @@ class CreateTokenUseCase:
 
         _logger.info("User found. Proceeding with token generation...")
 
-        token = await self.token_port.create_token(user_id=user.id)
+        token = await self.token_port.create_token(user_id=user.id)  # type: ignore
 
         _logger.info("Token generated.")
 
