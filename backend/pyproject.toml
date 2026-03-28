@@ -27,6 +27,7 @@ dependencies = [
     "ffmpeg-python>=0.2.0",
     "pyjwt>=2.12.1",
     "pwdlib>=0.3.0",
+    "pytest>=9.0.2",
 ]
 
 [tool.mypy]

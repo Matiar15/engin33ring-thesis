@@ -77,7 +77,7 @@ async def test_stitch_success(adapter, mock_storage_port):
             file_id="f1",
             bucket_name="engin33ring-thesis-frames",
             from_location="url1",
-            to_location=f"/tmp/stitcher/{user_id}",
+            to_location=f"/tmp/{user_id}",
         )
 
         # Verify upload
