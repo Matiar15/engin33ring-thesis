@@ -34,12 +34,11 @@ class MongoUserAdapter(UserPort):
 
         return inserted_id
 
-    async def fetch(self, email: str, hashed_password: str) -> User | None:
+    async def fetch(self, email: str) -> User | None:
         _logger.info("Fetching user with email: %s..." % email)
         user = await self.client.find_one(
             {
                 "email": email,
-                "password": hashed_password,
             }
         )
         if not user:

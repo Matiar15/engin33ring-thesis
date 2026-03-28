@@ -47,7 +47,7 @@ class JWTTokenAdapter(TokenPort):
             _logger.info("Invalid access token.")
             return False
 
-        user = self.user_port.fetch_for_token(email or "")
+        user = self.user_port.fetch(email or "")
 
         if not user:
             _logger.info("User not found for access token.")

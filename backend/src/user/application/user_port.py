@@ -15,13 +15,5 @@ class UserPort(abc.ABC):
     async def fetch(
         self,
         email: str,
-        hashed_password: str,
-    ) -> User | None:
-        """"""
-
-    @abc.abstractmethod
-    async def fetch_for_token(
-        self,
-        email: str,
     ) -> User | None:
         """"""
