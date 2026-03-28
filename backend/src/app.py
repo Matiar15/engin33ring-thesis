@@ -34,7 +34,9 @@ from backend.src.settings import get_settings
 from prometheus_fastapi_instrumentator import Instrumentator
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+from backend.src.token.api.endpoints import tokens_router
 from backend.src.token.application.create_token_use_case import CreateTokenUseCase
+from backend.src.user.api.endpoints import users_router
 from backend.src.user.application.create_user_use_case import CreateUserUseCase
 
 logging_config()
@@ -110,22 +112,43 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     _logger.info("Stopping application...")
 
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+
 app = fastapi.FastAPI(
     title="Engin33ring Thesis",
     lifespan=lifespan,
     debug=True,
 )
 
+@app.exception_handler(ValidationError)
+async def pydantic_validation_exception_handler(request: Request, exc: ValidationError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": exc.errors(), "message": "Validation error"},
+    )
+
+@app.exception_handler(ValueError)
+async def in_app_error_exception_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": exc.args, "message": "Application error occurred"},
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex="http://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(frames_router)
 app.include_router(analysis_router)
+app.include_router(users_router)
+app.include_router(tokens_router)
 
 Instrumentator().instrument(app).expose(app)
 FastAPIInstrumentor.instrument_app(app)
