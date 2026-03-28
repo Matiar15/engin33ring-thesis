@@ -67,7 +67,7 @@ export function useRegisterForm() {
                 onLogin();
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            const errorMessage = error?.message || 'An error occurred';
             toast.error(activeTab === 'register' ? 'Registration failed: ' + errorMessage : 'Login failed: ' + errorMessage);
             console.error('Auth error:', error);
         } finally {
