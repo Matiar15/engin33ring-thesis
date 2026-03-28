@@ -5,6 +5,8 @@ import fastapi
 
 from contextlib import asynccontextmanager
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from backend.src.analysis.application.end_analysis_use_case import EndAnalysisUseCase
 from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import (
@@ -61,10 +63,18 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
         settings,
     )
     _logger.info("Initialized stitcher port.")
+
     user_adapter = MongoUserAdapter(mongo_client)
     _logger.info("Initialized user port.")
+
     hasher_port = HasherAdapter()
     _logger.info("Initialized hasher port.")
+
+    token_port = JWTTokenAdapter(
+        settings=settings,
+        user_port=user_adapter,
+    )
+    _logger.info("Initialized token port.")
 
     create_frame_use_case = CreateFrameUseCase(
         analysis_port=analysis_port,
@@ -84,10 +94,7 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     create_token_use_case = CreateTokenUseCase(
         user_port=user_adapter,
         password_hasher=hasher_port,
-        token_port=JWTTokenAdapter(
-            settings=settings,
-            user_port=user_adapter,
-        ),
+        token_port=token_port,
     )
     _logger.info("Initialized use cases.")
 
@@ -96,6 +103,7 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     app.state.end_analysis_use_case = end_analysis_use_case
     app.state.create_user_use_case = create_user_use_case
     app.state.create_token_use_case = create_token_use_case
+    app.state.token_port = token_port
 
     _logger.info("Application started.")
     yield
@@ -106,6 +114,14 @@ app = fastapi.FastAPI(
     title="Engin33ring Thesis",
     lifespan=lifespan,
     debug=True,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(frames_router)
