@@ -1,13 +1,15 @@
 import {useCallback, useState} from "react";
 import {AuthTab} from "@/features/auth/types";
 import {useNavigate} from "react-router-dom";
+import {authService} from "@/services/authService";
+import {toast} from "sonner";
+import {useAuth} from "@/features/auth/context";
 
 export function useRegisterForm() {
     const navigate = useNavigate();
+    const { login: authLogin } = useAuth();
 
     const onLogin = useCallback(() => {
-        // W prawdziwej aplikacji tu byłaby logika autoryzacji
-        // Na razie po prostu przekierowujemy do dashboardu
         navigate('/analysis');
     }, [navigate]);
 
@@ -16,6 +18,7 @@ export function useRegisterForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const toggleActiveTab = useCallback((tab: AuthTab) => () => {
         setActiveTab(tab);
@@ -37,13 +40,40 @@ export function useRegisterForm() {
         setName(e.target.value);
     }, []);
 
-    const handleSubmit = useCallback((e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically handle form submission, e.g., call an API to register the user
-        // For this example, we'll just log the form data and switch to the login tab
-        console.log('Registering user:', { name, email, password });
-        onLogin();
-    }, [name, email, password, onLogin]);
+        setIsLoading(true);
+
+        try {
+            if (activeTab === 'register') {
+                await authService.register({
+                    login: name,
+                    email,
+                    password,
+                    full_name: name,
+                });
+                toast.success('Registration successful! Please log in.');
+                setActiveTab('login');
+            } else {
+                const response = await authService.login({ email, password });
+
+                // Decode JWT to get userId
+                const parts = response.access_token.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                const userId = payload.sub;
+
+                authLogin(response.access_token, userId);
+                toast.success('Login successful!');
+                onLogin();
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast.error(activeTab === 'register' ? 'Registration failed: ' + errorMessage : 'Login failed: ' + errorMessage);
+            console.error('Auth error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [name, email, password, onLogin, activeTab, authLogin]);
 
     return {
         activeTab,
@@ -51,6 +81,7 @@ export function useRegisterForm() {
         showPassword,
         email,
         name,
+        isLoading,
         toggleActiveTab,
         toggleShowPassword,
         changePassword,
