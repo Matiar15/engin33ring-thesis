@@ -25,9 +25,12 @@ describe('useAnalysisLifecycle', () => {
     const { result } = renderHook(() => useAnalysisLifecycle('user123'));
 
     const analysisId = await result.current.startAnalysis();
-
     expect(analysisId).toBe('analysis_123');
-    expect(result.current.analysisId).toBe('analysis_123');
+
+    await waitFor(() => {
+      expect(result.current.analysisId).toBe('analysis_123');
+    });
+
     expect(analysisService.createAnalysis).toHaveBeenCalledWith('user123');
     expect(toast.success).toHaveBeenCalledWith('Analysis started successfully');
   });
@@ -64,6 +67,10 @@ describe('useAnalysisLifecycle', () => {
     // Start analysis first
     await result.current.startAnalysis();
 
+    await waitFor(() => {
+      expect(result.current.analysisId).toBe('analysis_123');
+    });
+
     // End analysis
     const success = await result.current.endAnalysis();
 
@@ -98,6 +105,9 @@ describe('useAnalysisLifecycle', () => {
     const { result } = renderHook(() => useAnalysisLifecycle('user123'));
 
     await result.current.startAnalysis();
+    await waitFor(() => {
+      expect(result.current.analysisId).toBe('analysis_123');
+    });
     const success = await result.current.endAnalysis();
 
     expect(success).toBe(false);
@@ -110,7 +120,9 @@ describe('useAnalysisLifecycle', () => {
     const { result } = renderHook(() => useAnalysisLifecycle('user123'));
 
     await result.current.startAnalysis();
-    expect(result.current.analysisId).toBe('analysis_123');
+    await waitFor(() => {
+      expect(result.current.analysisId).toBe('analysis_123');
+    });
 
     result.current.resetAnalysis();
 
