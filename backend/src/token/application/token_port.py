@@ -1,6 +1,6 @@
 import abc
 
-from backend.src.token.domain.token import Token
+from backend.src.token.api.model import Token
 
 
 class TokenPort(abc.ABC):
