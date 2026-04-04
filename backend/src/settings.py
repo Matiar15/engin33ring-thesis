@@ -42,7 +42,7 @@ class AuthenticationSettings(pydantic.BaseModel):
 
 
 class Settings(pydantic_settings.BaseSettings):
-    application_name: str = "engin33ring-thesis"
+    application_name: str = "engin33ring-thesis-backend"
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
     stitcher: StitcherSettings

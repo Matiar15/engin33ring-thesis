@@ -4,6 +4,8 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.propagate import set_global_textmap
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 from backend.src.settings import get_settings
 
@@ -22,5 +24,6 @@ def tracing_config() -> None:
     )
     provider.add_span_processor(processor)
     trace.set_tracer_provider(provider)
+    set_global_textmap(TraceContextTextMapPropagator())
 
     _logger.info("Tracing initialized.")

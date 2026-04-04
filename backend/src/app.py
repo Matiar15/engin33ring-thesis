@@ -144,8 +144,8 @@ app.add_middleware(
     allow_origin_regex="http://.*",
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_headers=["*", "traceparent", "tracestate"],
+    expose_headers=["*", "traceparent", "tracestate"],
 )
 
 app.include_router(frames_router)

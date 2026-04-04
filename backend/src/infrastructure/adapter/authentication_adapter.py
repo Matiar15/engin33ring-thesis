@@ -1,9 +1,12 @@
+import opentelemetry.trace
+
 from backend.src.authentication.application.authentication_port import (
     AuthenticationPort,
 )
 from backend.src.hasher.application.hasher_port import HasherPort
 from backend.src.user.application.user_port import UserPort
 
+_tracer = opentelemetry.trace.get_tracer(__name__)
 
 class AuthenticationAdapter(AuthenticationPort):
     def __init__(
@@ -14,6 +17,7 @@ class AuthenticationAdapter(AuthenticationPort):
         self.user_port = user_port
         self.password_hasher = password_hasher
 
+    @_tracer.start_as_current_span("AuthenticationAdapter.authenticate")
     async def authenticate(
         self,
         email: str,
