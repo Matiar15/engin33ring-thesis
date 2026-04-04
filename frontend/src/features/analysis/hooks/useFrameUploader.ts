@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { frameService } from '@/services/frameService';
+import { frameService, FrameResponse } from '@/services/frameService';
 
 interface UseFrameUploaderProps {
   isProcessing: boolean;
@@ -7,6 +7,7 @@ interface UseFrameUploaderProps {
   videoUrl: string | null;
   analysisId: string | null;
   userId: string | null;
+  onFrameUploaded?: (data: FrameResponse) => void;
 }
 
 export function useFrameUploader({
@@ -15,6 +16,7 @@ export function useFrameUploader({
   videoUrl,
   analysisId,
   userId,
+  onFrameUploaded,
 }: UseFrameUploaderProps) {
   const frameCounter = useRef<number>(0);
   const frameUploadInterval = useRef<NodeJS.Timeout | null>(null);
@@ -54,12 +56,15 @@ export function useFrameUploader({
           );
 
           try {
-            await frameService.uploadFrame(
+            const response = await frameService.uploadFrame(
               userId,
               analysisId,
               frameFile,
               frameCounter.current.toString(),
             );
+            if (onFrameUploaded) {
+              onFrameUploaded(response);
+            }
             frameCounter.current++;
           } catch (error) {
             console.error('Failed to upload frame:', error);

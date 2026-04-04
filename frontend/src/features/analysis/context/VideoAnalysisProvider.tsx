@@ -19,12 +19,38 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
 
   const { analysisId, startAnalysis, endAnalysis, resetAnalysis } = useAnalysisLifecycle(userId);
 
+  const onFrameUploaded = useCallback((data: any) => {
+    dispatch({
+      type: 'ADD_DETECTION',
+      payload: {
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(),
+        signType: data.sign,
+        confidence: 0.99, // Mock confidence
+      },
+    });
+
+    dispatch({
+      type: 'SET_BOUNDING_BOXES',
+      payload: [{
+        id: Math.random().toString(36).substr(2, 9),
+        x: data.bounding_box.x,
+        y: data.bounding_box.y,
+        width: 100, // Default width
+        height: 100, // Default height
+        label: data.sign,
+        color: '#ef4444',
+      }],
+    });
+  }, [dispatch]);
+
   const { resetFrameCounter } = useFrameUploader({
     isProcessing: state.isProcessing,
     videoFile: state.videoFile,
     videoUrl: state.videoUrl,
     analysisId,
     userId,
+    onFrameUploaded,
   });
 
   const selectVideo = useCallback(async (file: File, url: string) => {

@@ -16,9 +16,13 @@ describe('frameService', () => {
   describe('uploadFrame', () => {
     it('should upload frame with correct FormData', async () => {
       const mockResponse = {
-        id: 'frame_001',
-        frame_url: 'http://storage.com/frame.jpg',
-        created_at: '2026-03-15T10:00:00Z',
+        sign: 'speed_limit_30',
+        bounding_box: {
+          x: 10,
+          y: 20,
+          width: 50,
+          height: 60,
+        },
       };
       vi.mocked(apiClient.postFormData).mockResolvedValue(mockResponse);
 
