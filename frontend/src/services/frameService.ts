@@ -10,6 +10,7 @@ export interface BoundingBox {
 export interface FrameResponse {
   sign: string;
   bounding_box: BoundingBox;
+  confidence: number;
 }
 
 export interface FrameService {

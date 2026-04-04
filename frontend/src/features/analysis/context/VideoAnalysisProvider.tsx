@@ -26,7 +26,7 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
         id: Math.random().toString(36).substr(2, 9),
         timestamp: new Date(),
         signType: data.sign,
-        confidence: 0.99, // Mock confidence
+        confidence: data.confidence,
       },
     });
 
@@ -36,8 +36,8 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
         id: Math.random().toString(36).substr(2, 9),
         x: data.bounding_box.x,
         y: data.bounding_box.y,
-        width: 100, // Default width
-        height: 100, // Default height
+        width: data.bounding_box.width,
+        height: data.bounding_box.height,
         label: data.sign,
         color: '#ef4444',
       }],
