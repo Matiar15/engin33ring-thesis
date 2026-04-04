@@ -116,12 +116,14 @@ class FFMpegStitcherAdapter(StitcherPort):
         frames_location: str,
     ) -> None:
         (
-            ffmpeg.input(f"{frames_location}/*.jpg", pattern_type="glob", framerate=30)
+            ffmpeg
+            .input(f"{frames_location}/*.jpg", pattern_type="glob", framerate=1)
             .filter("scale", "min(1920,iw)", "-2")
             .output(
                 video_name,
                 vcodec="libx264",
                 pix_fmt="yuv420p",
+                r=30
             )
             .run()
         )
