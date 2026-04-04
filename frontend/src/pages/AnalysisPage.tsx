@@ -7,7 +7,7 @@ import VideoControls from "@/features/analysis/components/VideoControls.tsx";
 
 const AnalysisPage = () => {
   const { state, selectVideo, stopAndArchive, reset } = useVideoAnalysis();
-  const { videoFile, videoUrl, isProcessing, detectionLogs } = state;
+  const { videoFile, videoUrl, isProcessing, isFinished, detectionLogs } = state;
 
   const mainContent = !videoUrl ? (
     <VideoUploader onVideoSelect={selectVideo} />
@@ -21,13 +21,14 @@ const AnalysisPage = () => {
 
         <VideoControls
           isProcessing={isProcessing}
+          isFinished={isFinished}
           videoFile={videoFile}
           stopAndArchive={stopAndArchive}
           reset={reset}
         />
       </div>
       <div className="lg:col-span-1 h-[calc(100vh-12rem)]">
-        <DetectionSidebar logs={detectionLogs} isProcessing={isProcessing} />
+        <DetectionSidebar logs={detectionLogs} isProcessing={isProcessing} isFinished={isFinished} />
       </div>
     </div>
   );

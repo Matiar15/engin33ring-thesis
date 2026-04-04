@@ -5,6 +5,7 @@ export interface VideoAnalysisState {
   videoFile: File | null;
   videoUrl: string | null;
   isProcessing: boolean;
+  isFinished: boolean;
   detectionLogs: DetectionLog[];
   boundingBoxes: BoundingBox[];
 }
@@ -13,6 +14,7 @@ export const initialVideoAnalysisState: VideoAnalysisState = {
   videoFile: null,
   videoUrl: null,
   isProcessing: false,
+  isFinished: false,
   detectionLogs: [],
   boundingBoxes: [],
 };
@@ -24,6 +26,7 @@ export type VideoAnalysisAction =
   | { type: 'SET_BOUNDING_BOXES'; payload: BoundingBox[] }
   | { type: 'PAUSE' }
   | { type: 'RESUME' }
+  | { type: 'FINISH' }
   | { type: 'STOP' }
   | { type: 'RESET' };
 
@@ -39,6 +42,7 @@ export function videoAnalysisReducer(
         videoFile: action.payload.file,
         videoUrl: action.payload.url,
         isProcessing: true,
+        isFinished: false,
         detectionLogs: [],
         boundingBoxes: [],
       };
@@ -61,6 +65,12 @@ export function videoAnalysisReducer(
       return {
         ...state,
         isProcessing: true,
+      };
+    case 'FINISH':
+      return {
+        ...state,
+        isProcessing: false,
+        isFinished: true,
       };
     case 'STOP':
       return {

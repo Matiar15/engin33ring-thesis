@@ -17,11 +17,15 @@ class EndAnalysisUseCase:
         self.analysis_port = analysis_port
         self.stitcher_port = stitcher_port
 
-    async def end(self, analysis_payload: EndAnalysisPayload) -> None:
-        _logger.info(f"Ending analysis for user: {analysis_payload.user_id}...")
+    async def end(
+        self,
+        analysis_payload: EndAnalysisPayload,
+        user_id: str,
+    ) -> None:
+        _logger.info(f"Ending analysis for user: {user_id}...")
         analysis = await self.analysis_port.get_one_and_update(
             id=analysis_payload.id,
-            user_id=analysis_payload.user_id,
+            user_id=user_id,
             statuses=["processing"],
             status="stitching",
         )
@@ -29,7 +33,7 @@ class EndAnalysisUseCase:
         if not analysis:
             leftover_analysis = await self.analysis_port.get_one_and_update(
                 id=analysis_payload.id,
-                user_id=analysis_payload.user_id,
+                user_id=user_id,
                 statuses=["stitching"],
                 modified_at=datetime.datetime.now() - datetime.timedelta(minutes=5),
                 status="stitching",

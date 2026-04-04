@@ -1,9 +1,4 @@
-import fastapi
 import pydantic
-
-
-class CreateAnalysisPayload(pydantic.BaseModel):
-    user_id: str  # todo: retrieve this from token
 
 
 class CreateAnalysisResponse(pydantic.BaseModel):
@@ -16,4 +11,3 @@ def map_to_response(id: str) -> CreateAnalysisResponse:
 
 class EndAnalysisPayload(pydantic.BaseModel):
     id: str
-    user_id: str  # todo: retrieve this from token

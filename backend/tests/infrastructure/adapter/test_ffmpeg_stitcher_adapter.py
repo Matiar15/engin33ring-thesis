@@ -56,7 +56,7 @@ async def test_stitch_success(adapter, mock_storage_port):
 
     with (
         patch("pathlib.Path.mkdir") as mock_mkdir,
-        patch("pathlib.Path.rmdir") as mock_rmdir,
+        patch("shutil.rmtree") as mock_rmtree,
         patch(
             "backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter.FFMpegStitcherAdapter._render_video"
         ) as mock_render,
@@ -69,7 +69,7 @@ async def test_stitch_success(adapter, mock_storage_port):
         assert result == "http://storage.com/video.mp4"
         assert mock_mkdir.called
         assert mock_render.called
-        assert mock_rmdir.called
+        assert mock_rmtree.called
 
         # Verify downloads
         assert mock_storage_port.download_file.call_count == 2
@@ -77,7 +77,7 @@ async def test_stitch_success(adapter, mock_storage_port):
             file_id="f1",
             bucket_name="engin33ring-thesis-frames",
             from_location="url1",
-            to_location=f"/tmp/stitcher/{user_id}",
+            to_location=f"/tmp/{user_id}",
         )
 
         # Verify upload

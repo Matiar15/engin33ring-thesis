@@ -2,7 +2,6 @@ import datetime
 import logging
 
 from backend.src.analysis.api.model import (
-    CreateAnalysisPayload,
     CreateAnalysisResponse,
     map_to_response,
 )
@@ -20,13 +19,14 @@ class CreateAnalysisUseCase:
         self.analysis_port = analysis_port
 
     async def create(
-        self, analysis_payload: CreateAnalysisPayload
+        self,
+        user_id: str,
     ) -> CreateAnalysisResponse:
-        _logger.info(f"Creating analysis for user: {analysis_payload.user_id}...")
+        _logger.info(f"Creating analysis for user: {user_id}...")
         inserted_id: str = await self.analysis_port.create(
             analysis=Analysis.from_payload(
-                analysis_payload.model_dump()
-                | {
+                {
+                    "user_id": user_id,
                     "status": "created",
                     "modified_at": datetime.datetime.now(),
                 }

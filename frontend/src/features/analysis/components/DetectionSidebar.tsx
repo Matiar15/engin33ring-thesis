@@ -7,15 +7,16 @@ import DetectionLogSection from "@/features/analysis/components/DetectionLogSect
 interface DetectionSidebarProps {
     logs: DetectionLog[];
     isProcessing: boolean;
+    isFinished: boolean;
 }
 
-const DetectionSidebar = ({logs, isProcessing}: DetectionSidebarProps) => {
+const DetectionSidebar = ({logs, isProcessing, isFinished}: DetectionSidebarProps) => {
     const {scrollRef, stats, reversedLogs, getConfidenceLevel} = useDetectionStats(logs);
 
     return (
         <div className="h-full flex flex-col bg-card rounded-xl neon-border overflow-hidden">
             <DetectionHeader
-                isProcessing={isProcessing}
+                isProcessing={isProcessing || isFinished}
                 signsLength={logs.length}
             />
             <DetectionStats stats={stats}/>

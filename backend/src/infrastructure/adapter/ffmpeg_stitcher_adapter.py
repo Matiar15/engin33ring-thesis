@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import pathlib
+import shutil
 
 import ffmpeg
 
@@ -68,7 +69,7 @@ class FFMpegStitcherAdapter(StitcherPort):
         _logger.info("Video uploaded to long term storage: %s" % video_url)
 
         _logger.info("Removing temporary directory...")
-        await asyncio.to_thread(user_directory.rmdir)
+        await asyncio.to_thread(shutil.rmtree, user_directory)
         _logger.info("Temporary directory removed: %s" % user_directory)
 
         return video_url
