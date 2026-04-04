@@ -1,6 +1,7 @@
 import datetime
 import logging
 import typing
+import opentelemetry.trace
 
 import jwt
 
@@ -10,6 +11,7 @@ from backend.src.token.api.model import Token
 from backend.src.user.application.user_port import UserPort
 
 _logger = logging.getLogger(__name__)
+_tracer = opentelemetry.trace.get_tracer(__name__)
 
 
 class JWTTokenAdapter(TokenPort):
@@ -23,6 +25,7 @@ class JWTTokenAdapter(TokenPort):
         self.secret = settings.authentication.secret
         self.token_ttl = settings.authentication.access_token_expire_mins
 
+    @_tracer.start_as_current_span("JWTTokenAdapter.create_token")
     async def create_token(self, user_id: str) -> Token:
         _logger.info("Creating access token for user: %s..." % user_id)
         now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -36,6 +39,7 @@ class JWTTokenAdapter(TokenPort):
         _logger.info("Access token created for user: %s" % user_id)
         return Token(access_token=encoded_jwt, token_type="bearer")
 
+    @_tracer.start_as_current_span("JWTTokenAdapter.verify_token")
     async def verify_token(self, token: Token) -> bool:
         try:
             _logger.info("Verifying access token...")
@@ -56,6 +60,7 @@ class JWTTokenAdapter(TokenPort):
         _logger.info("Access token verified.")
         return True
 
+    @_tracer.start_as_current_span("JWTTokenAdapter.parse_token")
     async def parse_token(self, token: Token) -> dict[str, typing.Any]:
         return jwt.decode(
             token.access_token,

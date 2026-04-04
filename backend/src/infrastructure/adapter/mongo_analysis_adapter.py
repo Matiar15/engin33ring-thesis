@@ -1,6 +1,7 @@
 import datetime
 import logging
 import typing
+import opentelemetry.trace
 
 import bson
 
@@ -11,6 +12,7 @@ from backend.src.analysis.application.analysis_port import AnalysisPort
 from backend.src.analysis.domain.analysis import Analysis
 
 _logger = logging.getLogger(__name__)
+_tracer = opentelemetry.trace.get_tracer(__name__)
 
 
 class MongoAnalysisAdapter(AnalysisPort):
@@ -20,6 +22,7 @@ class MongoAnalysisAdapter(AnalysisPort):
     ):
         self.client: AsyncCollection[Analysis] = client["analysis"]  # type: ignore
 
+    @_tracer.start_as_current_span("MongoAnalysisAdapter.create")
     async def create(
         self,
         analysis: Analysis,
@@ -37,6 +40,7 @@ class MongoAnalysisAdapter(AnalysisPort):
 
         return inserted_id
 
+    @_tracer.start_as_current_span("MongoAnalysisAdapter.get_one")
     async def get_one(
         self,
         id: str,
@@ -58,12 +62,14 @@ class MongoAnalysisAdapter(AnalysisPort):
 
         return Analysis.model_validate(analysis)
 
+    @_tracer.start_as_current_span("MongoAnalysisAdapter.update")
     async def update(self, id: str, **kwargs: typing.Any) -> None:
         update_criteria = self._update_criteria(**kwargs)
         await self.client.update_one(
             filter={"_id": bson.ObjectId(id)}, update=update_criteria
         )
 
+    @_tracer.start_as_current_span("MongoAnalysisAdapter.get_one_and_update")
     async def get_one_and_update(
         self,
         id: str,

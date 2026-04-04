@@ -1,5 +1,6 @@
 import logging
 import typing
+import opentelemetry.trace
 
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
@@ -8,6 +9,7 @@ from backend.src.user.application.user_port import UserPort
 from backend.src.user.domain.user import User
 
 _logger = logging.getLogger(__name__)
+_tracer = opentelemetry.trace.get_tracer(__name__)
 
 
 class MongoUserAdapter(UserPort):
@@ -17,6 +19,7 @@ class MongoUserAdapter(UserPort):
     ):
         self.client: AsyncCollection[User] = client["user"]  # type: ignore
 
+    @_tracer.start_as_current_span("MongoUserAdapter.create")
     async def create(
         self,
         user: User,
@@ -34,6 +37,7 @@ class MongoUserAdapter(UserPort):
 
         return inserted_id
 
+    @_tracer.start_as_current_span("MongoUserAdapter.fetch")
     async def fetch(self, email: str) -> User | None:
         _logger.info("Fetching user with email: %s..." % email)
         user = await self.client.find_one(
@@ -47,6 +51,7 @@ class MongoUserAdapter(UserPort):
 
         return User.model_validate(user)
 
+    @_tracer.start_as_current_span("MongoUserAdapter.fetch_for_token")
     async def fetch_for_token(self, email: str) -> User | None:
         _logger.info("Fetching user with email: %s..." % email)
         user = await self.client.find_one({"email": email})

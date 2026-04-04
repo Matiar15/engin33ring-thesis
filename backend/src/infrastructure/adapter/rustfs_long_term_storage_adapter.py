@@ -1,6 +1,7 @@
 import asyncio
 import typing
 import uuid
+import opentelemetry.trace
 
 from botocore.client import BaseClient
 
@@ -9,10 +10,14 @@ from backend.src.long_term_storage.application.long_term_storage_port import (
 )
 
 
+_tracer = opentelemetry.trace.get_tracer(__name__)
+
+
 class RustFSLongTermStorageAdapter(LongTermStoragePort):
     def __init__(self, client: BaseClient):
         self.client = client
 
+    @_tracer.start_as_current_span("RustFSLongTermStorageAdapter.store_file")
     async def store_file(
         self,
         file: typing.BinaryIO,
@@ -33,6 +38,7 @@ class RustFSLongTermStorageAdapter(LongTermStoragePort):
 
         return object_name
 
+    @_tracer.start_as_current_span("RustFSLongTermStorageAdapter.download_file")
     async def download_file(
         self,
         file_id: str,

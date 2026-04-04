@@ -2,6 +2,7 @@ import asyncio
 import logging
 import pathlib
 import shutil
+import opentelemetry.trace
 
 import ffmpeg
 
@@ -12,7 +13,7 @@ from backend.src.stitcher.application.stitcher_port import StitcherPort
 from backend.src.settings import Settings
 
 _logger = logging.getLogger(__name__)
-
+_tracer = opentelemetry.trace.get_tracer(__name__)
 
 class FFMpegStitcherAdapter(StitcherPort):
     def __init__(
@@ -24,6 +25,7 @@ class FFMpegStitcherAdapter(StitcherPort):
         self.temporary_storage = settings.stitcher.temporary_dir
         self.bucket_name = settings.stitcher.bucket_name
 
+    @_tracer.start_as_current_span("FFMpegStitcherAdapter.stitch")
     async def stitch(
         self,
         video_name: str,
@@ -74,8 +76,9 @@ class FFMpegStitcherAdapter(StitcherPort):
 
         return video_url
 
+    @staticmethod
+    @_tracer.start_as_current_span("FFMpegStitcherAdapter.render_video")
     def _render_video(
-        self,
         video_name: str,
         frames_location: str,
     ) -> None:
@@ -90,6 +93,7 @@ class FFMpegStitcherAdapter(StitcherPort):
             .run()
         )
 
+    @_tracer.start_as_current_span("FFMpegStitcherAdapter.store_video")
     async def _store_video(
         self,
         video_name: str,
