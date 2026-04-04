@@ -62,6 +62,9 @@ class CreateFrameUseCase:
 
         _logger.info(f"Creating frame for user: {frame_payload.user_id}...")
 
+        _logger.info(f"Frame created in analysis!")
+        response = map_to_response()
+
         await self.analysis_port.update(
             id=str(analysis.id),
             frame=Frame.from_payload(
@@ -69,10 +72,14 @@ class CreateFrameUseCase:
                     "id": frame_payload.incoming_id,
                     "frame_url": frame_url,
                     "created_at": datetime.datetime.now(),
+                    "sign": response.sign,
+                    "x": response.bounding_box.x,
+                    "y": response.bounding_box.y,
+                    "width": response.bounding_box.width,
+                    "height": response.bounding_box.height,
                 }
             ),
             status="processing",
         )
 
-        _logger.info(f"Frame created in analysis!")
-        return map_to_response()
+        return response

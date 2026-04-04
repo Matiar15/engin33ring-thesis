@@ -8,6 +8,7 @@ from backend.src.user.application.user_port import UserPort
 
 _tracer = opentelemetry.trace.get_tracer(__name__)
 
+
 class AuthenticationAdapter(AuthenticationPort):
     def __init__(
         self,

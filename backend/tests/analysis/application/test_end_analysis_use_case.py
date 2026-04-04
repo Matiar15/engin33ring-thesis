@@ -27,14 +27,15 @@ def use_case(mock_analysis_port, mock_stitcher_port):
 @pytest.mark.asyncio
 async def test_end_analysis_success(use_case, mock_analysis_port, mock_stitcher_port):
     # Given
-    payload = EndAnalysisPayload(id="analysis_123", user_id="user_456")
+    user_id = "user_456"
+    payload = EndAnalysisPayload(id="analysis_123")
     frames = [
         Frame(id="f1", frame_url="url1", created_at=datetime.datetime.now()),
         Frame(id="f2", frame_url="url2", created_at=datetime.datetime.now()),
     ]
     analysis = Analysis(
         id="analysis_123",
-        user_id="user_456",
+        user_id=user_id,
         status="processing",
         modified_at=datetime.datetime.now(),
         frames=frames,
@@ -44,20 +45,20 @@ async def test_end_analysis_success(use_case, mock_analysis_port, mock_stitcher_
     mock_stitcher_port.stitch.return_value = "http://storage.com/video.mp4"
 
     # When
-    await use_case.end(payload)
+    await use_case.end(payload, user_id)
 
     # Then
     mock_analysis_port.get_one_and_update.assert_called_once_with(
         id="analysis_123",
-        user_id="user_456",
+        user_id=user_id,
         statuses=["processing"],
         status="stitching",
     )
 
     mock_stitcher_port.stitch.assert_called_once_with(
         video_name="analysis_123",
-        user_id="user_456",
-        frames=[("f1", "url1"), ("f2", "url2")],
+        user_id=user_id,
+        frames=frames,
     )
 
     mock_analysis_port.update.assert_called_once_with(
@@ -70,11 +71,12 @@ async def test_end_analysis_leftover_success(
     use_case, mock_analysis_port, mock_stitcher_port
 ):
     # Given
-    payload = EndAnalysisPayload(id="analysis_123", user_id="user_456")
+    user_id = "user_456"
+    payload = EndAnalysisPayload(id="analysis_123")
     frames = [Frame(id="f1", frame_url="url1", created_at=datetime.datetime.now())]
     analysis = Analysis(
         id="analysis_123",
-        user_id="user_456",
+        user_id=user_id,
         status="stitching",
         modified_at=datetime.datetime.now() - datetime.timedelta(minutes=10),
         frames=frames,
@@ -86,7 +88,7 @@ async def test_end_analysis_leftover_success(
     mock_stitcher_port.stitch.return_value = "http://storage.com/video.mp4"
 
     # When
-    await use_case.end(payload)
+    await use_case.end(payload, user_id)
 
     # Then
     assert mock_analysis_port.get_one_and_update.call_count == 2
@@ -99,23 +101,25 @@ async def test_end_analysis_leftover_success(
 @pytest.mark.asyncio
 async def test_end_analysis_not_found_raises_error(use_case, mock_analysis_port):
     # Given
-    payload = EndAnalysisPayload(id="analysis_123", user_id="user_456")
+    user_id = "user_456"
+    payload = EndAnalysisPayload(id="analysis_123")
     mock_analysis_port.get_one_and_update.return_value = None
 
     # When / Then
     with pytest.raises(
         ValueError, match="Analysis with id: analysis_123 does not exist."
     ):
-        await use_case.end(payload)
+        await use_case.end(payload, user_id)
 
 
 @pytest.mark.asyncio
 async def test_end_analysis_no_frames_raises_error(use_case, mock_analysis_port):
     # Given
-    payload = EndAnalysisPayload(id="analysis_123", user_id="user_456")
+    user_id = "user_456"
+    payload = EndAnalysisPayload(id="analysis_123")
     analysis = Analysis(
         id="analysis_123",
-        user_id="user_456",
+        user_id=user_id,
         status="processing",
         modified_at=datetime.datetime.now(),
         frames=[],
@@ -126,4 +130,4 @@ async def test_end_analysis_no_frames_raises_error(use_case, mock_analysis_port)
     with pytest.raises(
         ValueError, match="No frames found for analysis with id: analysis_123."
     ):
-        await use_case.end(payload)
+        await use_case.end(payload, user_id)
