@@ -2,19 +2,20 @@ import {Square} from "lucide-react";
 
 interface VideoControlsProps {
     isProcessing: boolean;
+    isFinished: boolean;
     videoFile: File | null;
     stopAndArchive: () => void;
     reset: () => void;
 }
 
-const VideoControls = ({ isProcessing, videoFile, stopAndArchive, reset} : VideoControlsProps) => {
+const VideoControls = ({ isProcessing, isFinished, videoFile, stopAndArchive, reset} : VideoControlsProps) => {
     return (
         <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
-                    <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-neon-green animate-pulse' : 'bg-muted-foreground'}`} />
+                    <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-neon-green animate-pulse' : isFinished ? 'bg-blue-500' : 'bg-muted-foreground'}`} />
                     <span className="text-sm font-medium">
-                      {isProcessing ? 'Processing' : 'Paused'}
+                      {isProcessing ? 'Processing' : isFinished ? 'Finished' : 'Paused'}
                     </span>
                 </div>
                 {videoFile && (
@@ -35,10 +36,10 @@ const VideoControls = ({ isProcessing, videoFile, stopAndArchive, reset} : Video
                 <button
                     onClick={stopAndArchive}
                     aria-label="Stop and Archive"
-                    className="flex items-center gap-2 px-3 py-3 sm:px-6 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg font-display font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-destructive/25"
-                    style={{
+                    className="flex items-center gap-2 px-3 py-3 sm:px-6 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg font-display font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-destructive/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                    style={!isFinished ? {
                         boxShadow: '0 0 20px hsl(0 84% 60% / 0.4), 0 0 40px hsl(0 84% 60% / 0.2)'
-                    }}
+                    } : {}}
                 >
                     <Square className="w-4 h-4 fill-current" />
                     <span className="hidden sm:inline">Stop & Archive</span>

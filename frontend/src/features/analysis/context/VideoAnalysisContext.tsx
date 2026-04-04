@@ -7,6 +7,7 @@ export interface VideoAnalysisContextValue {
   selectVideo: (file: File, url: string) => void;
   pause: () => void;
   resume: () => void;
+  finish: () => void;
   stopAndArchive: () => void;
   reset: () => void;
 }

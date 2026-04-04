@@ -44,6 +44,10 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
     dispatch({ type: 'RESUME' });
   }, []);
 
+  const finish = useCallback(() => {
+    dispatch({ type: 'FINISH' });
+  }, []);
+
   const stopAndArchive = useCallback(async () => {
     dispatch({ type: 'STOP' });
 
@@ -84,6 +88,7 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
     selectVideo,
     pause,
     resume,
+    finish,
     stopAndArchive,
     reset,
   };
