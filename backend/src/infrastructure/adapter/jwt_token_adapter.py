@@ -25,7 +25,7 @@ class JWTTokenAdapter(TokenPort):
 
     async def create_token(self, user_id: str) -> Token:
         _logger.info("Creating access token for user: %s..." % user_id)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
         expires_in = now + datetime.timedelta(minutes=self.token_ttl)
         access_token = {
             "sub": user_id,
@@ -43,8 +43,8 @@ class JWTTokenAdapter(TokenPort):
                 token.access_token, self.secret, algorithms=[self.algorithm]
             )
             email = parsed_token.get("sub")
-        except jwt.PyJWTError:
-            _logger.info("Invalid access token.")
+        except jwt.PyJWTError as e:
+            _logger.warning("Invalid access token. Error: %s", e)
             return False
 
         user = self.user_port.fetch(email or "")
