@@ -8,7 +8,9 @@ from backend.src.frame.application.create_frame_use_case import CreateFrameUseCa
 from backend.src.token.application.create_token_use_case import CreateTokenUseCase
 from backend.src.token.application.token_port import TokenPort
 from backend.src.user.application.create_user_use_case import CreateUserUseCase
-from backend.src.analysis.application.get_analysis_list_use_case import GetAnalysisListUseCase
+from backend.src.analysis.application.get_analysis_list_use_case import (
+    GetAnalysisListUseCase,
+)
 from backend.src.analysis.application.get_video_url_use_case import GetVideoUrlUseCase
 
 

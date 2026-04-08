@@ -1,9 +1,12 @@
 import logging
 
 from backend.src.analysis.application.analysis_port import AnalysisPort
-from backend.src.long_term_storage.application.long_term_storage_port import LongTermStoragePort
+from backend.src.long_term_storage.application.long_term_storage_port import (
+    LongTermStoragePort,
+)
 
 _logger = logging.getLogger(__name__)
+
 
 class GetVideoUrlUseCase:
     def __init__(
@@ -21,10 +24,9 @@ class GetVideoUrlUseCase:
         analysis = await self.analysis_port.get_one(id=id, user_id=user_id)
         if not analysis or not analysis.video_url:
             return None
-        
+
         return await self.long_term_storage_port.generate_presigned_url(
             bucket_name=self.bucket_name,
             object_name=analysis.video_url,
             expiration=900,
         )
-

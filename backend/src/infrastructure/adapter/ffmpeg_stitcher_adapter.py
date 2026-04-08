@@ -18,6 +18,7 @@ from backend.src.frame.domain.frame import Frame
 _logger = logging.getLogger(__name__)
 _tracer = opentelemetry.trace.get_tracer(__name__)
 
+
 class FFMpegStitcherAdapter(StitcherPort):
     def __init__(
         self,
@@ -36,7 +37,9 @@ class FFMpegStitcherAdapter(StitcherPort):
         frames: list[Frame],
     ) -> str:
         video_name = f"{video_name}.mp4"
-        frames_location = f"{self.temporary_storage}/{user_id}_{video_name.replace('.mp4', '')}"
+        frames_location = (
+            f"{self.temporary_storage}/{user_id}_{video_name.replace('.mp4', '')}"
+        )
         _logger.info(f"Stitching {len(frames)} frames")
 
         _logger.info("Creating temporary directory for user: %s..." % user_id)
@@ -54,21 +57,25 @@ class FFMpegStitcherAdapter(StitcherPort):
         )
 
         _logger.info("Downloading frames...")
-        images = list(await asyncio.gather(
-            *[
-                self.long_term_storage_port.download_file(
-                    file_id=frame.id,
-                    bucket_name="engin33ring-thesis-frames",
-                    from_location=frame.frame_url,
-                    to_location=frames_location,
-                )
-                for frame in sorted_frames
-            ]
-        ))
+        images = list(
+            await asyncio.gather(
+                *[
+                    self.long_term_storage_port.download_file(
+                        file_id=frame.id,
+                        bucket_name="engin33ring-thesis-frames",
+                        from_location=frame.frame_url,
+                        to_location=frames_location,
+                    )
+                    for frame in sorted_frames
+                ]
+            )
+        )
         _logger.info(f"Frames downloaded: {images}")
 
         _logger.info("Preparing frames...")
-        await asyncio.to_thread(self._prepare_frames, images, sorted_frames, frames_location)
+        await asyncio.to_thread(
+            self._prepare_frames, images, sorted_frames, frames_location
+        )
 
         _logger.info("Starting stitching...")
         await asyncio.to_thread(self._render_video, video_name, frames_location)
@@ -132,13 +139,20 @@ class FFMpegStitcherAdapter(StitcherPort):
     ) -> None:
         result = subprocess.run(
             [
-                "ffmpeg", "-y",
-                "-framerate", "10",
-                "-i", f"{frames_location}/frame_%04d.png",
-                "-c:v", "libx264",
-                "-pix_fmt", "yuv420p",
-                "-crf", "23",
-                "-movflags", "+faststart",
+                "ffmpeg",
+                "-y",
+                "-framerate",
+                "10",
+                "-i",
+                f"{frames_location}/frame_%04d.png",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-crf",
+                "23",
+                "-movflags",
+                "+faststart",
                 video_name,
             ],
             capture_output=True,

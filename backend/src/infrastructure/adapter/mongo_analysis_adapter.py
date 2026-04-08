@@ -99,9 +99,12 @@ class MongoAnalysisAdapter(AnalysisPort):
         offset: int = 0,
     ) -> list[Analysis]:
         _logger.info(f"Getting analyses for user limit {limit} offset {offset}")
-        cursor = self.client.find(
-            {"user_id": user_id}
-        ).sort("modified_at", -1).skip(offset).limit(limit)
+        cursor = (
+            self.client.find({"user_id": user_id})
+            .sort("modified_at", -1)
+            .skip(offset)
+            .limit(limit)
+        )
 
         analyses = await cursor.to_list(length=limit)
         return [Analysis.model_validate(a) for a in analyses]
