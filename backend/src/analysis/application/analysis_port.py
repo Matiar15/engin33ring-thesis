@@ -37,3 +37,12 @@ class AnalysisPort(abc.ABC):
         **kwargs: typing.Any,
     ) -> Analysis | None:
         """"""
+
+    @abc.abstractmethod
+    async def get_list(
+        self,
+        user_id: str,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> list[Analysis]:
+        """"""

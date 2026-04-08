@@ -14,6 +14,7 @@ class Analysis(pydantic.BaseModel):
     status: str
     modified_at: datetime.datetime
     frames: list[Frame] | None = None
+    video_url: str | None = None
 
     model_config = {
         "populate_by_name": True,

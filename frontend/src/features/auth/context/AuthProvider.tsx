@@ -12,8 +12,7 @@ function decodeJWT(token: string): { sub?: string } | null {
     if (parts.length !== 3) return null;
 
     const payload = parts[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded;
+    return JSON.parse(atob(payload));
   } catch {
     return null;
   }
@@ -51,6 +50,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setToken(null);
     setUserId(null);
   }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      logout();
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, [logout]);
 
   const value = {
     userId,

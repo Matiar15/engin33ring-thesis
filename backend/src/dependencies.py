@@ -8,6 +8,10 @@ from backend.src.frame.application.create_frame_use_case import CreateFrameUseCa
 from backend.src.token.application.create_token_use_case import CreateTokenUseCase
 from backend.src.token.application.token_port import TokenPort
 from backend.src.user.application.create_user_use_case import CreateUserUseCase
+from backend.src.analysis.application.get_analysis_list_use_case import (
+    GetAnalysisListUseCase,
+)
+from backend.src.analysis.application.get_video_url_use_case import GetVideoUrlUseCase
 
 
 def get_create_frame_use_case(request: fastapi.Request) -> CreateFrameUseCase:
@@ -22,6 +26,16 @@ def get_create_analysis_use_case(request: fastapi.Request) -> CreateAnalysisUseC
 
 def get_end_analysis_use_case(request: fastapi.Request) -> EndAnalysisUseCase:
     use_case: EndAnalysisUseCase = request.app.state.end_analysis_use_case
+    return use_case
+
+
+def get_analysis_list_use_case(request: fastapi.Request) -> GetAnalysisListUseCase:
+    use_case: GetAnalysisListUseCase = request.app.state.get_analysis_list_use_case
+    return use_case
+
+
+def get_video_url_use_case(request: fastapi.Request) -> GetVideoUrlUseCase:
+    use_case: GetVideoUrlUseCase = request.app.state.get_video_url_use_case
     return use_case
 
 

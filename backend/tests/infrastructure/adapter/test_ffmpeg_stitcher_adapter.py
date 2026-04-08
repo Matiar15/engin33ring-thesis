@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, mock_open
+from unittest.mock import AsyncMock, MagicMock, patch, mock_open, PropertyMock
 
 from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import (
     FFMpegStitcherAdapter,
@@ -10,6 +10,8 @@ from backend.src.settings import (
     DatabaseSettings,
     LongTermStorageSettings,
 )
+from backend.src.frame.domain.frame import Frame
+import datetime
 
 
 @pytest.fixture
@@ -49,7 +51,10 @@ async def test_stitch_success(adapter, mock_storage_port):
     # Given
     video_name = "analysis_123"
     user_id = "user_456"
-    frames = [("f1", "url1"), ("f2", "url2")]
+    frames = [
+        Frame(id="f1", frame_url="url1", created_at=datetime.datetime.now()),
+        Frame(id="f2", frame_url="url2", created_at=datetime.datetime.now()),
+    ]
 
     mock_storage_port.download_file.side_effect = ["/tmp/f1.jpg", "/tmp/f2.jpg"]
     mock_storage_port.store_file.return_value = "http://storage.com/video.mp4"
@@ -86,3 +91,56 @@ async def test_stitch_success(adapter, mock_storage_port):
         assert call_args["bucket_name"] == "test-videos"
         assert call_args["naming_strategy"] == f"{user_id}/"
         assert call_args["format"] == "mp4"
+
+
+@pytest.mark.asyncio
+async def test_add_bounding_boxes(adapter):
+    # Given
+    frames = [
+        Frame(
+            id="f1",
+            frame_url="url1",
+            created_at=datetime.datetime.now(),
+            sign="speed_limit_30",
+            x=10,
+            y=20,
+            width=50,
+            height=60,
+        ),
+        Frame(
+            id="f2",
+            frame_url="url2",
+            created_at=datetime.datetime.now(),
+            # No sign, should be skipped
+        ),
+    ]
+    image_paths = ["/tmp/f1.jpg", "/tmp/f2.jpg"]
+
+    with (
+        patch("PIL.Image.open") as mock_open_img,
+        patch("PIL.ImageDraw.Draw") as mock_draw,
+        patch("pathlib.PurePath.stem", new_callable=PropertyMock) as mock_stem,
+    ):
+        # Mock stem for the paths
+        mock_stem.side_effect = ["f1", "f2"]
+
+        # Mock Image object
+        mock_img = MagicMock()
+        mock_open_img.return_value.__enter__.return_value = mock_img
+        mock_drawer = MagicMock()
+        mock_draw.return_value = mock_drawer
+
+        # When
+        adapter._add_bounding_boxes(image_paths, frames)
+
+        # Then
+        # Should only be called for f1
+        assert mock_drawer.rectangle.called
+        assert mock_drawer.text.called
+        mock_drawer.rectangle.assert_called_once_with(
+            [10, 20, 10 + 50, 20 + 60], outline="red", width=5
+        )
+        mock_drawer.text.assert_called_once_with(
+            (10, 20 - 20), "speed_limit_30", fill="red"
+        )
+        assert mock_img.save.called

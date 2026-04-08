@@ -14,17 +14,45 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
   const navigate = useNavigate();
   const { userId } = useAuth();
   const [state, dispatch] = useReducer(videoAnalysisReducer, initialVideoAnalysisState);
-
-  const processingStartTime = useRef<Date | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const { analysisId, startAnalysis, endAnalysis, resetAnalysis } = useAnalysisLifecycle(userId);
 
+  const onFrameUploaded = useCallback((data: any) => {
+    dispatch({
+      type: 'ADD_DETECTION',
+      payload: {
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(),
+        signType: data.sign,
+        confidence: data.confidence,
+      },
+    });
+
+    if (data.bounding_box) {
+      dispatch({
+        type: 'SET_BOUNDING_BOXES',
+        payload: [{
+          id: Math.random().toString(36).substr(2, 9),
+          x: data.bounding_box.x,
+          y: data.bounding_box.y,
+          width: data.bounding_box.width,
+          height: data.bounding_box.height,
+          label: data.sign,
+          color: '#ef4444',
+        }],
+      });
+    } else {
+      dispatch({ type: 'SET_BOUNDING_BOXES', payload: [] });
+    }
+  }, [dispatch]);
+
   const { resetFrameCounter } = useFrameUploader({
     isProcessing: state.isProcessing,
-    videoFile: state.videoFile,
-    videoUrl: state.videoUrl,
+    videoRef,
     analysisId,
     userId,
+    onFrameUploaded,
   });
 
   const selectVideo = useCallback(async (file: File, url: string) => {
@@ -33,7 +61,6 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
 
     resetFrameCounter();
     dispatch({ type: 'SELECT_VIDEO', payload: { file, url } });
-    processingStartTime.current = new Date();
   }, [startAnalysis, resetFrameCounter]);
 
   const pause = useCallback(() => {
@@ -50,29 +77,16 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
 
   const stopAndArchive = useCallback(async () => {
     dispatch({ type: 'STOP' });
+    dispatch({ type: 'SAVE_START' });
 
-    const endTime = new Date();
-    const startTime = processingStartTime.current || endTime;
-    const durationMs = endTime.getTime() - startTime.getTime();
-    const durationSecs = Math.floor(durationMs / 1000);
-    const mins = Math.floor(durationSecs / 60);
-    const secs = durationSecs % 60;
-
-    const success = await endAnalysis();
-
-    if (success) {
-      console.log('Archiving session:', {
-        analysisId,
-        thumbnail: state.videoUrl || '',
-        date: startTime,
-        duration: `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`,
-        signsDetected: state.detectionLogs.length,
-        detections: state.detectionLogs,
-      });
-
+    try {
+      await endAnalysis();
       navigate('/registry');
+    } catch (error) {
+      console.error('Failed to save analysis:', error);
+      dispatch({ type: 'SAVE_DONE' });
     }
-  }, [state.videoUrl, state.detectionLogs, navigate, analysisId, endAnalysis]);
+  }, [navigate, endAnalysis]);
 
   const reset = useCallback(() => {
     if (state.videoUrl) {
@@ -85,6 +99,7 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
 
   const value = {
     state,
+    videoRef,
     selectVideo,
     pause,
     resume,

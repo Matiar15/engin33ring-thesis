@@ -1,19 +1,23 @@
+import os
 import asyncio
 import logging
 import pathlib
 import shutil
+import subprocess
 import opentelemetry.trace
-
-import ffmpeg
+import PIL.Image
+import PIL.ImageDraw
 
 from backend.src.long_term_storage.application.long_term_storage_port import (
     LongTermStoragePort,
 )
 from backend.src.stitcher.application.stitcher_port import StitcherPort
 from backend.src.settings import Settings
+from backend.src.frame.domain.frame import Frame
 
 _logger = logging.getLogger(__name__)
 _tracer = opentelemetry.trace.get_tracer(__name__)
+
 
 class FFMpegStitcherAdapter(StitcherPort):
     def __init__(
@@ -30,14 +34,16 @@ class FFMpegStitcherAdapter(StitcherPort):
         self,
         video_name: str,
         user_id: str,
-        frames: list[tuple[str, str]],
+        frames: list[Frame],
     ) -> str:
         video_name = f"{video_name}.mp4"
-        frames_location = f"{self.temporary_storage}/{user_id}"
-        _logger.info(f"Stitching frames: {frames}")
+        frames_location = (
+            f"{self.temporary_storage}/{user_id}_{video_name.replace('.mp4', '')}"
+        )
+        _logger.info(f"Stitching {len(frames)} frames")
 
         _logger.info("Creating temporary directory for user: %s..." % user_id)
-        user_directory = pathlib.Path(f"{self.temporary_storage}/{user_id}")
+        user_directory = pathlib.Path(frames_location)
         await asyncio.to_thread(
             user_directory.mkdir,
             exist_ok=True,
@@ -45,23 +51,35 @@ class FFMpegStitcherAdapter(StitcherPort):
         )
         _logger.info("Temporary directory created: %s" % user_directory)
 
+        sorted_frames = sorted(
+            frames,
+            key=lambda f: int(f.id) if f.id.isdigit() else float("inf"),
+        )
+
         _logger.info("Downloading frames...")
-        images = await asyncio.gather(
-            *[
-                self.long_term_storage_port.download_file(
-                    file_id=id_,
-                    bucket_name="engin33ring-thesis-frames",
-                    from_location=url,
-                    to_location=frames_location,
-                )
-                for id_, url in frames
-            ]
+        images = list(
+            await asyncio.gather(
+                *[
+                    self.long_term_storage_port.download_file(
+                        file_id=frame.id,
+                        bucket_name="engin33ring-thesis-frames",
+                        from_location=frame.frame_url,
+                        to_location=frames_location,
+                    )
+                    for frame in sorted_frames
+                ]
+            )
         )
         _logger.info(f"Frames downloaded: {images}")
 
+        _logger.info("Preparing frames...")
+        await asyncio.to_thread(
+            self._prepare_frames, images, sorted_frames, frames_location
+        )
+
         _logger.info("Starting stitching...")
         await asyncio.to_thread(self._render_video, video_name, frames_location)
-        _logger.info(f"Stitching completed!")
+        _logger.info("Stitching completed!")
 
         _logger.info("Uploading video to long term storage...")
         video_url = await self._store_video(
@@ -72,9 +90,46 @@ class FFMpegStitcherAdapter(StitcherPort):
 
         _logger.info("Removing temporary directory...")
         await asyncio.to_thread(shutil.rmtree, user_directory)
+        await asyncio.to_thread(os.remove, video_name)
         _logger.info("Temporary directory removed: %s" % user_directory)
 
         return video_url
+
+    @staticmethod
+    @_tracer.start_as_current_span("FFMpegStitcherAdapter.prepare_frames")
+    def _prepare_frames(
+        image_paths: list[str],
+        frames: list[Frame],
+        frames_location: str,
+    ) -> None:
+        if not image_paths:
+            return
+
+        with PIL.Image.open(image_paths[0]) as first_img:
+            target_size = (first_img.width // 2 * 2, first_img.height // 2 * 2)
+
+        for i, (path, frame) in enumerate(zip(image_paths, frames), start=1):
+            img = PIL.Image.open(path)
+            img.load()
+            img = img.convert("RGB")
+
+            if img.size != target_size:
+                img = img.resize(target_size, PIL.Image.Resampling.LANCZOS)
+
+            if frame.sign and frame.x is not None and frame.y is not None:
+                draw = PIL.ImageDraw.Draw(img)
+                w = frame.width or 100
+                h = frame.height or 100
+                draw.rectangle(
+                    [frame.x, frame.y, frame.x + w, frame.y + h],
+                    outline="red",
+                    width=5,
+                )
+                draw.text((frame.x, frame.y - 20), frame.sign, fill="red")
+
+            img.save(os.path.join(frames_location, f"frame_{i:04d}.png"), format="PNG")
+            img.close()
+            os.remove(path)
 
     @staticmethod
     @_tracer.start_as_current_span("FFMpegStitcherAdapter.render_video")
@@ -82,16 +137,29 @@ class FFMpegStitcherAdapter(StitcherPort):
         video_name: str,
         frames_location: str,
     ) -> None:
-        (
-            ffmpeg.input(f"{frames_location}/*.jpg", pattern_type="glob", framerate=30)
-            .filter("scale", "min(1920,iw)", "-2")
-            .output(
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-framerate",
+                "10",
+                "-i",
+                f"{frames_location}/frame_%04d.png",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-crf",
+                "23",
+                "-movflags",
+                "+faststart",
                 video_name,
-                vcodec="libx264",
-                pix_fmt="yuv420p",
-            )
-            .run()
+            ],
+            capture_output=True,
+            text=True,
         )
+        if result.returncode != 0:
+            raise RuntimeError(f"ffmpeg failed: {result.stderr}")
 
     @_tracer.start_as_current_span("FFMpegStitcherAdapter.store_video")
     async def _store_video(

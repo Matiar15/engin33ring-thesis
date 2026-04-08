@@ -6,6 +6,7 @@ import AuthPage from "@/pages/AuthPage.tsx";
 import RegistryPage from "@/pages/RegistryPage.tsx";
 import AnalysisPage from "@/pages/AnalysisPage.tsx";
 import { VideoAnalysisProvider } from "@/features/analysis/context";
+import ProtectedRoute from "@/features/auth/components/ProtectedRoute.tsx";
 
 const queryClient = new QueryClient();
 
@@ -20,12 +21,16 @@ const App = () => (
     >
       <Routes>
         <Route path="/" element={<AuthPage />} />
-        <Route path="/registry" element={<RegistryPage/>} />
-        <Route path="/analysis" element={
-          <VideoAnalysisProvider>
-            <AnalysisPage/>
-          </VideoAnalysisProvider>
-        } />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/registry" element={<RegistryPage/>} />
+          <Route path="/analysis" element={
+            <VideoAnalysisProvider>
+              <AnalysisPage/>
+            </VideoAnalysisProvider>
+          } />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

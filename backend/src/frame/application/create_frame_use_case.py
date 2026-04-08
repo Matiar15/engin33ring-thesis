@@ -55,12 +55,15 @@ class CreateFrameUseCase:
         frame_url = await self.long_term_storage_port.store_file(
             frame_payload.frame.file,
             bucket_name="engin33ring-thesis-frames",
-            naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/",
+            naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/{frame_payload.incoming_id}_",
             format="jpg",
         )
         _logger.info(f"Frame file stored at: {frame_url}")
 
         _logger.info(f"Creating frame for user: {frame_payload.user_id}...")
+
+        _logger.info(f"Frame created in analysis!")
+        response = map_to_response()
 
         await self.analysis_port.update(
             id=str(analysis.id),
@@ -69,10 +72,14 @@ class CreateFrameUseCase:
                     "id": frame_payload.incoming_id,
                     "frame_url": frame_url,
                     "created_at": datetime.datetime.now(),
+                    "sign": response.sign,
+                    "x": response.bounding_box.x,
+                    "y": response.bounding_box.y,
+                    "width": response.bounding_box.width,
+                    "height": response.bounding_box.height,
                 }
             ),
             status="processing",
         )
 
-        _logger.info(f"Frame created in analysis!")
-        return map_to_response()
+        return response

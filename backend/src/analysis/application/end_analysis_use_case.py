@@ -51,13 +51,11 @@ class EndAnalysisUseCase:
                 f"No frames found for analysis with id: {analysis_payload.id}."
             )
 
-        frame_urls = [(frame.id, frame.frame_url) for frame in analysis.frames]
-
         _logger.info(f"Stitching frames...")
         video = await self.stitcher_port.stitch(
             video_name=analysis.id,  # type: ignore
             user_id=analysis.user_id,
-            frames=frame_urls,
+            frames=analysis.frames,
         )
 
         await self.analysis_port.update(

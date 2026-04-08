@@ -1,17 +1,47 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Eye, Scan, ArrowLeft, FileVideo, Target } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Calendar, Clock, Eye, Scan, ArrowLeft, FileVideo, Target, Loader2, X } from 'lucide-react';
 import { ArchiveEntry } from "@/features/analysis/types";
-import { initialArchiveData } from '@/mockData.ts';
+import { analysisService } from '@/services/analysisService';
+import { useState } from 'react';
 
 const RegistryPage = () => {
   const navigate = useNavigate();
-  // TODO: Replace with API call to fetch user's analysis history
-  // const { data: entries, isLoading } = useQuery({
-  //   queryKey: ['analyses', userId],
-  //   queryFn: () => analysisService.getAnalyses(userId)
-  // });
-  const [entries] = useState<ArchiveEntry[]>(initialArchiveData);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  
+  const { data: analyses, isLoading } = useQuery({
+    queryKey: ['analyses'],
+    queryFn: () => analysisService.getAnalyses(50, 0)
+  });
+
+  const handleOpenVideo = async (analysisId: string) => {
+    try {
+      const { url } = await analysisService.getVideoUrl(analysisId);
+      setPlayingVideo(url);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const entries: ArchiveEntry[] = (analyses || []).map(a => {
+    const signsCount = a.frames?.filter(f => f.sign).length || 0;
+    const durationMins = Math.floor((a.frames?.length || 0) / 60);
+    const durationSecs = (a.frames?.length || 0) % 60;
+    
+    return {
+      id: a.id || (a as any)._id,
+      thumbnail: '', // We don't have an easily accessible thumbnail
+      date: new Date(a.modified_at),
+      duration: `${durationMins}:${durationSecs.toString().padStart(2, '0')}`,
+      signsDetected: signsCount,
+      detections: (a.frames || []).filter(f => f.sign).map((f, i) => ({
+        id: f.id || String(i),
+        timestamp: new Date(f.created_at),
+        signType: f.sign!,
+        confidence: 100 // Backend model frame doesn't return confidence atm
+      }))
+    };
+  });
 
   return (
     <div className="min-h-screen flex flex-col animate-fade-in">
@@ -40,14 +70,18 @@ const RegistryPage = () => {
         <div className="flex items-center gap-4 sm:justify-end">
           <div className="text-left sm:text-right">
             <p className="text-sm text-muted-foreground">Total Sessions</p>
-            <p className="font-display font-bold text-2xl text-primary">{entries.length}</p>
+            <p className="font-display font-bold text-2xl text-primary">{isLoading ? '-' : entries.length}</p>
           </div>
         </div>
       </header>
 
       {/* Main content */}
       <main className="flex-1 p-4 sm:p-6">
-        {entries.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="p-6 rounded-full bg-muted/30 mb-6">
               <FileVideo className="w-16 h-16 text-muted-foreground/50" />
@@ -68,24 +102,13 @@ const RegistryPage = () => {
             {entries.map((entry, index) => (
               <div
                 key={entry.id}
-                className="group glass-panel rounded-xl overflow-hidden neon-border hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] animate-scale-in"
+                onClick={() => handleOpenVideo(entry.id)}
+                className="group glass-panel rounded-xl overflow-hidden neon-border hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] cursor-pointer animate-scale-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-muted overflow-hidden">
-                  {entry.thumbnail.startsWith('blob:') ? (
-                    <video
-                      src={entry.thumbnail}
-                      className="w-full h-full object-cover"
-                      muted
-                    />
-                  ) : (
-                    <img
-                      src={entry.thumbnail}
-                      alt="Session thumbnail"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
+                <div className="relative aspect-video bg-muted overflow-hidden flex items-center justify-center">
+                  <FileVideo className="w-12 h-12 text-muted-foreground/30" />
                   
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
@@ -105,11 +128,11 @@ const RegistryPage = () => {
                 </div>
 
                 {/* Info */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="p-4 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="w-4 h-4" />
-                      <span className="text-sm">
+                      <span className="text-sm font-medium">
                         {entry.date.toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -117,7 +140,7 @@ const RegistryPage = () => {
                         })}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground font-mono">
+                    <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded-md">
                       {entry.date.toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -126,29 +149,29 @@ const RegistryPage = () => {
                   </div>
 
                   {/* Stats */}
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-muted/20 border border-border/50 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-neon-green" />
-                      <span className="text-sm font-medium">Signs Detected</span>
+                      <Target className="w-4 h-4 text-neon-green" />
+                      <span className="text-sm font-medium text-muted-foreground">Total Detections</span>
                     </div>
-                    <span className="text-2xl font-display font-bold text-neon-green">
+                    <span className="text-xl font-display font-bold text-neon-green">
                       {entry.signsDetected}
                     </span>
                   </div>
 
                   {/* Top detections preview */}
                   {entry.detections.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 pt-1">
                       {[...new Set(entry.detections.map(d => d.signType))].slice(0, 3).map((sign: string, i: number) => (
                         <span
                           key={i}
-                          className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full border border-primary/20"
+                          className="px-2 py-1 text-[10px] font-medium tracking-wide bg-primary/10 text-primary rounded-full border border-primary/20 uppercase"
                         >
                           {sign}
                         </span>
                       ))}
                       {[...new Set(entry.detections.map(d => d.signType))].length > 3 && (
-                        <span className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-full">
+                        <span className="px-2 py-1 text-[10px] font-medium tracking-wide bg-muted text-muted-foreground rounded-full border border-border/50 uppercase">
                           +{[...new Set(entry.detections.map(d => d.signType))].length - 3} more
                         </span>
                       )}
@@ -160,6 +183,26 @@ const RegistryPage = () => {
           </div>
         )}
       </main>
+
+      {/* Video Modal */}
+      {playingVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 sm:p-8 animate-fade-in">
+          <button
+            onClick={() => setPlayingVideo(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="w-full max-w-5xl rounded-xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10">
+            <video
+              src={playingVideo}
+              controls
+              autoPlay
+              className="w-full max-h-[85vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

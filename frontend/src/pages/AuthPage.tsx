@@ -2,9 +2,12 @@ import { Eye, EyeOff, Mail, Lock, User, Scan, ShieldCheck } from 'lucide-react';
 import { AuthTab } from '@/features/auth/types'
 import {useRegisterForm} from "@/features/auth/hooks/useRegisterForm.ts";
 import AuthLogo from "@/features/auth/components/AuthLogo.tsx";
-
+import { useAuth } from '@/features/auth/context';
+import { Navigate } from 'react-router-dom';
 
 const AuthPage = () => {
+  const { isAuthenticated } = useAuth();
+  
   const {
     activeTab,
     password,
@@ -19,6 +22,10 @@ const AuthPage = () => {
     changeName,
     handleSubmit
   } = useRegisterForm()
+
+  if (isAuthenticated) {
+    return <Navigate to="/analysis" replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">

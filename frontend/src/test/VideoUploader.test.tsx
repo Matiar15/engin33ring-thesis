@@ -30,7 +30,7 @@ describe('VideoUploader', () => {
     render(<VideoUploader onVideoSelect={vi.fn()} />);
 
     expect(screen.getByText('Upload Video for Analysis')).toBeInTheDocument();
-    expect(screen.getByText('Supports MP4, WebM, MOV')).toBeInTheDocument();
+    expect(screen.getByText('Supports MP4')).toBeInTheDocument();
   });
 
   it('shows validation error when hook returns error', () => {

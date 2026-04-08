@@ -1,9 +1,16 @@
 import { apiClient } from './apiClient';
 
+export interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface FrameResponse {
-  id: string;
-  frame_url: string;
-  created_at: string;
+  sign: string;
+  bounding_box: BoundingBox;
+  confidence: number;
 }
 
 export interface FrameService {

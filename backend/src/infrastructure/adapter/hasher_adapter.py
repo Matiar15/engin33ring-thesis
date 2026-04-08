@@ -6,6 +6,7 @@ from backend.src.hasher.application.hasher_port import HasherPort
 
 _tracer = opentelemetry.trace.get_tracer(__name__)
 
+
 class HasherAdapter(HasherPort):
     def __init__(
         self,
