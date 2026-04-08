@@ -91,6 +91,21 @@ class MongoAnalysisAdapter(AnalysisPort):
         _logger.info("Analysis updated: %s" % id)
         return Analysis.model_validate(analysis)
 
+    @_tracer.start_as_current_span("MongoAnalysisAdapter.get_list")
+    async def get_list(
+        self,
+        user_id: str,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> list[Analysis]:
+        _logger.info(f"Getting analyses for user limit {limit} offset {offset}")
+        cursor = self.client.find(
+            {"user_id": user_id}
+        ).sort("modified_at", -1).skip(offset).limit(limit)
+
+        analyses = await cursor.to_list(length=limit)
+        return [Analysis.model_validate(a) for a in analyses]
+
     @staticmethod
     def _filters(
         id: str,

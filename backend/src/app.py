@@ -12,6 +12,10 @@ from backend.src.analysis.api.endpoints import analysis_router
 from backend.src.analysis.application.create_analysis_use_case import (
     CreateAnalysisUseCase,
 )
+from backend.src.analysis.application.get_analysis_list_use_case import (
+    GetAnalysisListUseCase,
+)
+from backend.src.analysis.application.get_video_url_use_case import GetVideoUrlUseCase
 from backend.src.infrastructure.adapter.hasher_adapter import HasherAdapter
 from backend.src.infrastructure.adapter.jwt_token_adapter import JWTTokenAdapter
 from backend.src.infrastructure.adapter.mongo_user_adapter import MongoUserAdapter
@@ -85,6 +89,14 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     create_analysis_use_case = CreateAnalysisUseCase(
         analysis_port=analysis_port,
     )
+    get_analysis_list_use_case = GetAnalysisListUseCase(
+        analysis_port=analysis_port,
+    )
+    get_video_url_use_case = GetVideoUrlUseCase(
+        analysis_port=analysis_port,
+        long_term_storage_port=long_term_storage_port,
+        bucket_name=settings.stitcher.bucket_name,
+    )
     end_analysis_use_case = EndAnalysisUseCase(
         analysis_port=analysis_port,
         stitcher_port=stitcher_port,
@@ -102,6 +114,8 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
 
     app.state.create_frame_use_case = create_frame_use_case
     app.state.create_analysis_use_case = create_analysis_use_case
+    app.state.get_analysis_list_use_case = get_analysis_list_use_case
+    app.state.get_video_url_use_case = get_video_url_use_case
     app.state.end_analysis_use_case = end_analysis_use_case
     app.state.create_user_use_case = create_user_use_case
     app.state.create_token_use_case = create_token_use_case
