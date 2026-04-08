@@ -55,7 +55,7 @@ class CreateFrameUseCase:
         frame_url = await self.long_term_storage_port.store_file(
             frame_payload.frame.file,
             bucket_name="engin33ring-thesis-frames",
-            naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/",
+            naming_strategy=f"{frame_payload.user_id}/{frame_payload.analysis_id}/{frame_payload.incoming_id}_",
             format="jpg",
         )
         _logger.info(f"Frame file stored at: {frame_url}")

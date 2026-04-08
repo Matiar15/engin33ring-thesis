@@ -25,6 +25,6 @@ class FramePayload(pydantic.BaseModel):
 def map_to_response() -> FrameResponse:
     return FrameResponse(
         sign="SPEED_LIMIT_30",
-        bounding_box=BoundingBox(x=100, y=64, width=120, height=120),
+        bounding_box=BoundingBox(x=15.6, y=13.3, width=18.75, height=25.0),
         confidence=99,
     )
