@@ -18,7 +18,6 @@ from backend.src.frame.domain.frame import Frame
 _logger = logging.getLogger(__name__)
 _tracer = opentelemetry.trace.get_tracer(__name__)
 
-
 class FFMpegStitcherAdapter(StitcherPort):
     def __init__(
         self,
