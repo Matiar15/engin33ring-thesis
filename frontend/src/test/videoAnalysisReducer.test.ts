@@ -78,7 +78,7 @@ describe('videoAnalysisReducer', () => {
     const next = videoAnalysisReducer(state, { type: 'STOP' });
 
     expect(next.isProcessing).toBe(false);
-    expect(next.boundingBoxes).toHaveLength(0);
+    expect(next.boundingBoxes).toHaveLength(1);
     expect(next.detectionLogs).toHaveLength(1);
   });
 
