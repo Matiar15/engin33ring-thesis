@@ -1,4 +1,4 @@
-import { Play, Pause, Maximize } from 'lucide-react';
+import { Play, Pause, Maximize, Loader2 } from 'lucide-react';
 import { useVideoControls } from '@/features/analysis/hooks/useVideoControls.ts';
 import { useBoundingBoxOverlay } from '@/features/analysis/hooks/useBoundingBoxOverlay.ts';
 import { useVideoAnalysis } from '@/features/analysis/context';
@@ -10,13 +10,13 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer = ({ videoUrl, isProcessing }: VideoPlayerProps) => {
-  const { state, pause, resume, finish } = useVideoAnalysis();
+  const { state, videoRef, pause, resume, finish } = useVideoAnalysis();
   const { isFinished } = state;
 
   const {
-    videoRef,
     containerRef,
     isPlaying,
+    isPendingPlay,
     progress,
     currentTime,
     duration,
@@ -26,11 +26,13 @@ const VideoPlayer = ({ videoUrl, isProcessing }: VideoPlayerProps) => {
     autoPlay: isProcessing,
     onPlay: resume,
     onPause: pause,
+    externalVideoRef: videoRef,
   });
 
   const { canvasRef } = useBoundingBoxOverlay({
     boxes: state.boundingBoxes,
     containerRef,
+    isPaused: !isPlaying,
   });
   return (
     <div 
@@ -80,10 +82,12 @@ const VideoPlayer = ({ videoUrl, isProcessing }: VideoPlayerProps) => {
           <div className="flex items-center gap-3">
             <button
               onClick={togglePlay}
-              disabled={isFinished}
+              disabled={isFinished || isPendingPlay}
               className="p-2 rounded-lg bg-primary/20 hover:bg-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPlaying ? (
+              {isPendingPlay ? (
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              ) : isPlaying ? (
                 <Pause className="w-5 h-5 text-primary" />
               ) : (
                 <Play className="w-5 h-5 text-primary" />

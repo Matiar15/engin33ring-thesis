@@ -1,4 +1,4 @@
-import { Upload, Film, AlertCircle } from 'lucide-react';
+import { Upload, Film, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useFileDrop } from '@/features/analysis/hooks/useFileDrop.ts';
 
 const SUPPORTED_VIDEO_CODECS = [
@@ -11,6 +11,8 @@ const canPlayAny = () => {
 	const testVideo = document.createElement('video');
 	return SUPPORTED_VIDEO_CODECS.some(codec => testVideo.canPlayType(codec) !== '');
 };
+
+const isFirefox = () => /Firefox/i.test(navigator.userAgent);
 
 const validateVideoFile = (file: File): string | null => {
 	if (!file.type.startsWith('video/mp4')) {
@@ -35,6 +37,15 @@ const VideoUploader = ({ onVideoSelect }: VideoUploaderProps) => {
 
 	return (
 		<div className="flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 animate-fade-in">
+			{isFirefox() && (
+				<div className="flex items-center gap-3 mb-4 w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl px-4 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400">
+					<AlertTriangle className="w-5 h-5 shrink-0" />
+					<span className="text-sm">
+						Firefox may produce corrupted video frames during analysis.
+						For the best experience use <strong>Chrome</strong> or <strong>Safari</strong>.
+					</span>
+				</div>
+			)}
 			<div
 				{...dragProps}
 				className={`relative w-full max-w-2xl sm:max-w-3xl lg:max-w-4xl aspect-video rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden group ${
@@ -73,7 +84,7 @@ const VideoUploader = ({ onVideoSelect }: VideoUploaderProps) => {
 				<p className="text-muted-foreground text-center max-w-md text-sm sm:text-base">
 					Drag and drop a video file or click to browse.
 					<br />
-					<span className="text-xs sm:text-sm">Supports MP4, WebM, MOV</span>
+					<span className="text-xs sm:text-sm">Supports MP4</span>
 				</p>
 
 				{error && (

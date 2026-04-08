@@ -1,9 +1,10 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, RefObject } from 'react';
 import { VideoAnalysisState } from './videoAnalysisReducer.ts';
 
 // Context Value
 export interface VideoAnalysisContextValue {
   state: VideoAnalysisState;
+  videoRef: RefObject<HTMLVideoElement | null>;
   selectVideo: (file: File, url: string) => void;
   pause: () => void;
   resume: () => void;

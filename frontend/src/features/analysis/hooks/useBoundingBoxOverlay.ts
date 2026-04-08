@@ -1,17 +1,20 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { BoundingBox } from '@/features/analysis/types';
 import * as React from "react";
 
 interface UseBoundingBoxOverlayOptions {
   boxes: BoundingBox[];
   containerRef: React.RefObject<HTMLDivElement | null>;
+  isPaused?: boolean;
 }
 
 export function useBoundingBoxOverlay({
   boxes,
   containerRef,
+  isPaused = false,
 }: UseBoundingBoxOverlayOptions) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   const drawBox = useCallback((
     ctx: CanvasRenderingContext2D,
@@ -19,6 +22,8 @@ export function useBoundingBoxOverlay({
     canvasWidth: number,
     canvasHeight: number
   ) => {
+    const color = isPaused ? '#888888' : box.color;
+
     const x = (box.x / 100) * canvasWidth;
     const y = (box.y / 100) * canvasHeight;
     const w = (box.width / 100) * canvasWidth;
@@ -26,11 +31,11 @@ export function useBoundingBoxOverlay({
     const cornerSize = 10;
 
     // Glow effect
-    ctx.shadowColor = box.color;
-    ctx.shadowBlur = 15;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = isPaused ? 0 : 15;
 
     // Box outline
-    ctx.strokeStyle = box.color;
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, w, h);
 
@@ -67,22 +72,25 @@ export function useBoundingBoxOverlay({
 
     // Label background
     ctx.shadowBlur = 0;
-    ctx.fillStyle = box.color;
+    ctx.fillStyle = color;
     const labelWidth = ctx.measureText(box.label).width + 16;
     ctx.fillRect(x, y - 24, labelWidth, 22);
 
     // Label text
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = isPaused ? '#ffffff' : '#000';
     ctx.font = 'bold 12px Rajdhani';
     ctx.fillText(box.label, x + 8, y - 8);
-  }, []);
+  }, [isPaused]);
 
   // Resize canvas when container changes
   useEffect(() => {
     const resizeCanvas = () => {
       if (canvasRef.current && containerRef.current) {
-        canvasRef.current.width = containerRef.current.offsetWidth;
-        canvasRef.current.height = containerRef.current.offsetHeight;
+        const w = containerRef.current.offsetWidth;
+        const h = containerRef.current.offsetHeight;
+        canvasRef.current.width = w;
+        canvasRef.current.height = h;
+        setCanvasSize({ width: w, height: h });
       }
     };
 
@@ -91,7 +99,7 @@ export function useBoundingBoxOverlay({
     return () => window.removeEventListener('resize', resizeCanvas);
   }, [containerRef]);
 
-  // Draw boxes when they change
+  // Draw boxes when they change or canvas is resized
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -102,8 +110,7 @@ export function useBoundingBoxOverlay({
     // Clear and redraw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     boxes.forEach(box => drawBox(ctx, box, canvas.width, canvas.height));
-  }, [boxes, drawBox]);
+  }, [boxes, drawBox, canvasSize, isPaused]);
 
   return { canvasRef };
 }
-

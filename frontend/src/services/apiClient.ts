@@ -105,6 +105,10 @@ class ApiClient {
   }
 
   private async handleError(response: Response): Promise<ApiError> {
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+
     let message = `Request failed with status ${response.status}`;
 
     try {
