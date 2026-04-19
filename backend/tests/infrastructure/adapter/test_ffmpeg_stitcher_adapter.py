@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, mock_open, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, patch, mock_open
 
 from backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter import (
     FFMpegStitcherAdapter,
@@ -62,6 +62,10 @@ async def test_stitch_success(adapter, mock_storage_port):
     with (
         patch("pathlib.Path.mkdir") as mock_mkdir,
         patch("shutil.rmtree") as mock_rmtree,
+        patch("os.remove") as mock_remove,
+        patch(
+            "backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter.FFMpegStitcherAdapter._prepare_frames"
+        ) as mock_prepare,
         patch(
             "backend.src.infrastructure.adapter.ffmpeg_stitcher_adapter.FFMpegStitcherAdapter._render_video"
         ) as mock_render,
@@ -82,7 +86,7 @@ async def test_stitch_success(adapter, mock_storage_port):
             file_id="f1",
             bucket_name="engin33ring-thesis-frames",
             from_location="url1",
-            to_location=f"/tmp/{user_id}",
+            to_location=f"/tmp/{user_id}_{video_name}",
         )
 
         # Verify upload
@@ -94,53 +98,56 @@ async def test_stitch_success(adapter, mock_storage_port):
 
 
 @pytest.mark.asyncio
-async def test_add_bounding_boxes(adapter):
-    # Given
-    frames = [
-        Frame(
-            id="f1",
-            frame_url="url1",
-            created_at=datetime.datetime.now(),
-            sign="speed_limit_30",
-            x=10,
-            y=20,
-            width=50,
-            height=60,
-        ),
-        Frame(
-            id="f2",
-            frame_url="url2",
-            created_at=datetime.datetime.now(),
-            # No sign, should be skipped
-        ),
-    ]
-    image_paths = ["/tmp/f1.jpg", "/tmp/f2.jpg"]
+async def test_draw_bounding_box_converts_percentages_to_pixels(adapter):
+    frame = Frame(
+        id="f1",
+        frame_url="url1",
+        created_at=datetime.datetime.now(),
+        sign="speed_limit_30",
+        x=10.0,
+        y=20.0,
+        width=50.0,
+        height=25.0,
+    )
 
-    with (
-        patch("PIL.Image.open") as mock_open_img,
-        patch("PIL.ImageDraw.Draw") as mock_draw,
-        patch("pathlib.PurePath.stem", new_callable=PropertyMock) as mock_stem,
-    ):
-        # Mock stem for the paths
-        mock_stem.side_effect = ["f1", "f2"]
+    img = MagicMock()
+    img.size = (640, 480)
 
-        # Mock Image object
-        mock_img = MagicMock()
-        mock_open_img.return_value.__enter__.return_value = mock_img
+    with patch("PIL.ImageDraw.Draw") as mock_draw_cls:
         mock_drawer = MagicMock()
-        mock_draw.return_value = mock_drawer
+        mock_draw_cls.return_value = mock_drawer
 
-        # When
-        adapter._add_bounding_boxes(image_paths, frames)
+        adapter._draw_bounding_box(img, frame)
 
-        # Then
-        # Should only be called for f1
-        assert mock_drawer.rectangle.called
-        assert mock_drawer.text.called
+        expected_x = 10.0 / 100 * 640  # 64.0
+        expected_y = 20.0 / 100 * 480  # 96.0
+        expected_w = 50.0 / 100 * 640  # 320.0
+        expected_h = 25.0 / 100 * 480  # 120.0
+
         mock_drawer.rectangle.assert_called_once_with(
-            [10, 20, 10 + 50, 20 + 60], outline="red", width=5
+            [expected_x, expected_y, expected_x + expected_w, expected_y + expected_h],
+            outline="red",
+            width=5,
         )
         mock_drawer.text.assert_called_once_with(
-            (10, 20 - 20), "speed_limit_30", fill="red"
+            (expected_x, expected_y - 20),
+            "speed_limit_30",
+            fill="red",
         )
-        assert mock_img.save.called
+
+
+@pytest.mark.asyncio
+async def test_draw_bounding_box_skips_frame_without_sign(adapter):
+    frame = Frame(
+        id="f1",
+        frame_url="url1",
+        created_at=datetime.datetime.now(),
+    )
+
+    img = MagicMock()
+    img.size = (640, 480)
+
+    with patch("PIL.ImageDraw.Draw") as mock_draw_cls:
+        adapter._draw_bounding_box(img, frame)
+
+        mock_draw_cls.assert_not_called()

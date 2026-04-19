@@ -116,20 +116,28 @@ class FFMpegStitcherAdapter(StitcherPort):
             if img.size != target_size:
                 img = img.resize(target_size, PIL.Image.Resampling.LANCZOS)
 
-            if frame.sign and frame.x is not None and frame.y is not None:
-                draw = PIL.ImageDraw.Draw(img)
-                w = frame.width or 100
-                h = frame.height or 100
-                draw.rectangle(
-                    [frame.x, frame.y, frame.x + w, frame.y + h],
-                    outline="red",
-                    width=5,
-                )
-                draw.text((frame.x, frame.y - 20), frame.sign, fill="red")
+            self._draw_bounding_box(img, frame)
 
             img.save(os.path.join(frames_location, f"frame_{i:04d}.png"), format="PNG")
             img.close()
             os.remove(path)
+
+    @staticmethod
+    @_tracer.start_as_current_span("FFMpegStitcherAdapter.draw_bounding_box")
+    def _draw_bounding_box(img: PIL.Image.Image, frame: Frame) -> None:
+        if not frame.sign or frame.x is None or frame.y is None:
+            return
+
+        img_w, img_h = img.size
+        draw = PIL.ImageDraw.Draw(img)
+
+        x = frame.x / 100 * img_w
+        y = frame.y / 100 * img_h
+        w = (frame.width or 0) / 100 * img_w
+        h = (frame.height or 0) / 100 * img_h
+
+        draw.rectangle([x, y, x + w, y + h], outline="red", width=5)
+        draw.text((x, max(y - 20, 0)), frame.sign, fill="red")
 
     @staticmethod
     @_tracer.start_as_current_span("FFMpegStitcherAdapter.render_video")

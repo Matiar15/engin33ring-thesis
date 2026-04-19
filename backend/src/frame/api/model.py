@@ -1,6 +1,8 @@
 import fastapi
 import pydantic
 
+from backend.src.frame.domain.detection import DetectionResult
+
 
 class BoundingBox(pydantic.BaseModel):
     x: float
@@ -16,15 +18,20 @@ class FrameResponse(pydantic.BaseModel):
 
 
 class FramePayload(pydantic.BaseModel):
-    user_id: str  # todo: retrieve this from token
+    user_id: str
     incoming_id: str
     frame: fastapi.UploadFile
     analysis_id: str
 
 
-def map_to_response() -> FrameResponse:
+def map_to_response(detection: DetectionResult) -> FrameResponse:
     return FrameResponse(
-        sign="SPEED_LIMIT_30",
-        bounding_box=BoundingBox(x=15.6, y=13.3, width=18.75, height=25.0),
-        confidence=99,
+        sign=detection.sign_name.upper(),
+        bounding_box=BoundingBox(
+            x=detection.x,
+            y=detection.y,
+            width=detection.width,
+            height=detection.height,
+        ),
+        confidence=int(detection.confidence * 100),
     )
