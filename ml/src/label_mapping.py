@@ -10,7 +10,7 @@ and analytics, but training uses fine-grained labels.
 
 # fmt: off
 
-# ── Fine-grained class names (43 classes) ───────────────────────
+# Fine-grained class names (43 classes)
 GTSDB_FINE_NAMES: dict[int, str] = {
     0: "speed_limit_20",
     1: "speed_limit_30",
@@ -60,9 +60,9 @@ GTSDB_FINE_NAMES: dict[int, str] = {
 # Set of all valid GTSDB class IDs (0–42)
 VALID_GTSDB_IDS: set[int] = set(GTSDB_FINE_NAMES.keys())
 
-# ── Super-category grouping (for analytics / dashboards) ────────
+# Super-category grouping (for analytics / dashboards)
 GTSDB_CLASS_TO_SUPERCATEGORY: dict[int, int] = {
-    # ── prohibitory (0) ──────────────────────
+    # prohibitory (0)
     0: 0,   # speed limit 20
     1: 0,   # speed limit 30
     2: 0,   # speed limit 50
@@ -79,7 +79,7 @@ GTSDB_CLASS_TO_SUPERCATEGORY: dict[int, int] = {
     15: 0,  # no vehicles
     16: 0,  # no trucks
     17: 0,  # no entry
-    # ── mandatory (1) ────────────────────────
+    # mandatory (1)
     33: 1,  # turn right ahead
     34: 1,  # turn left ahead
     35: 1,  # ahead only
@@ -90,7 +90,7 @@ GTSDB_CLASS_TO_SUPERCATEGORY: dict[int, int] = {
     40: 1,  # roundabout mandatory
     41: 1,  # end of no overtaking
     42: 1,  # end of no overtaking for trucks
-    # ── danger (2) ───────────────────────────
+    # danger (2)
     11: 2,  # right-of-way at next intersection
     18: 2,  # general caution
     19: 2,  # dangerous curve left
@@ -106,7 +106,7 @@ GTSDB_CLASS_TO_SUPERCATEGORY: dict[int, int] = {
     29: 2,  # bicycles crossing
     30: 2,  # beware of ice/snow
     31: 2,  # wild animals crossing
-    # ── other (3) ────────────────────────────
+    # other (3)
     12: 3,  # priority road
     32: 3,  # end of all speed and passing limits
 }

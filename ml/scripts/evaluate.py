@@ -69,11 +69,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # ── Load model ───────────────────────────────────────────────
     _logger.info(f"Loading model from {args.weights}…")
     model = YOLO(args.weights)
 
-    # ── Run validation ───────────────────────────────────────────
     _logger.info("Running validation…")
     metrics = model.val(
         data=args.data,
@@ -86,7 +84,6 @@ def main() -> None:
         exist_ok=True,
     )
 
-    # ── Print summary ────────────────────────────────────────────
     summary = {
         "mAP50": float(metrics.box.map50),
         "mAP50-95": float(metrics.box.map),
@@ -110,14 +107,12 @@ def main() -> None:
         _logger.info(f"  {cls_name:<15s}  AP@50: {ap:.4f}")
     _logger.info("=" * 50)
 
-    # Save metrics to JSON
     output_path = Path(args.output_dir) / "val" / "metrics.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(summary, f, indent=2)
     _logger.info(f"Metrics saved to {output_path}")
 
-    # ── Optional: save sample predictions ────────────────────────
     if args.save_images:
         _logger.info("Generating sample predictions…")
         model.predict(

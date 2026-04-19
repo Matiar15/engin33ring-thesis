@@ -19,6 +19,8 @@ import random
 import shutil
 from pathlib import Path
 
+from PIL import Image
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 _logger = logging.getLogger(__name__)
 
@@ -53,13 +55,23 @@ def build_yolo_split(
     images_dir.mkdir(parents=True, exist_ok=True)
     labels_dir.mkdir(parents=True, exist_ok=True)
 
-    for img_path in image_files:
-        shutil.copy2(img_path, images_dir / img_path.name)
+    SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 
-        stem = img_path.stem
-        label_file = labels_dir / f"{stem}.txt"
-        lines = annotations.get(img_path.name, [])
-        label_file.write_text("\n".join(lines) + "\n" if lines else "")
+    for img_path in image_files:
+        original_name = img_path.name
+
+        if img_path.suffix.lower() in SUPPORTED_EXTENSIONS:
+            shutil.copy2(img_path, images_dir / img_path.name)
+            dest_stem = img_path.stem
+        else:
+            dest_name = img_path.stem + ".jpg"
+            Image.open(img_path).convert("RGB").save(images_dir / dest_name)
+            dest_stem = img_path.stem
+
+        lines = annotations.get(original_name, [])
+        if lines:
+            label_file = labels_dir / f"{dest_stem}.txt"
+            label_file.write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:
