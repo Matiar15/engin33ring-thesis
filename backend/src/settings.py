@@ -41,12 +41,21 @@ class AuthenticationSettings(pydantic.BaseModel):
     access_token_expire_mins: int
 
 
+class DetectionSettings(pydantic.BaseModel):
+    model_path: str
+    input_size: int = 640
+    confidence_threshold: float = 0.25
+    iou_threshold: float = 0.45
+    num_classes: int = 43
+
+
 class Settings(pydantic_settings.BaseSettings):
     application_name: str = "engin33ring-thesis-backend"
     database: DatabaseSettings
     long_term_storage: LongTermStorageSettings
     stitcher: StitcherSettings
     authentication: AuthenticationSettings
+    detection: DetectionSettings
     logging: LoggingSettings = LoggingSettings()
     otel: OTELSettings = OTELSettings()
 
