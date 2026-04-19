@@ -5,8 +5,9 @@
 # ──────────────────────────────────────────────
 
 # Paths (relative to this file's location)
-train: /home/matiar/Programming/engin33ring-thesis/ml/datasets/gtsdb/images/train
-val: /home/matiar/Programming/engin33ring-thesis/ml/datasets/gtsdb/labels/train
+path: /home/matiar/Programming/engin33ring-thesis/ml/datasets/gtsdb
+train: images/train
+val: images/
 
 # Class names – 43 fine-grained traffic sign types
 nc: 43
