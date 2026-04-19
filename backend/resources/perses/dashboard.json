@@ -1,0 +1,745 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "backend-overview",
+    "project": "engin33ring-thesis"
+  },
+  "spec": {
+    "display": {
+      "name": "Backend Overview"
+    },
+    "datasources": {
+      "prometheus": {
+        "default": true,
+        "plugin": {
+          "kind": "PrometheusDatasource",
+          "spec": {
+            "directUrl": "http://prometheus:9090"
+          }
+        }
+      }
+    },
+    "duration": "30m",
+    "refreshInterval": "15s",
+    "variables": [],
+    "panels": {
+
+      "totalRequestRate": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Request Rate",
+            "description": "Total HTTP requests per second"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last",
+              "format": {
+                "unit": "decimal",
+                "shortValues": true
+              },
+              "sparkline": {}
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m]))",
+                    "seriesNameFormat": "req/s"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "avgResponseTime": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Avg Response Time",
+            "description": "Average HTTP response time"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last",
+              "format": {
+                "unit": "seconds"
+              },
+              "sparkline": {}
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_sum{job=\"backend\"}[5m])) / sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m]))",
+                    "seriesNameFormat": "avg"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "errorRateStat": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Error Rate",
+            "description": "Percentage of 5xx responses"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last",
+              "format": {
+                "unit": "percent"
+              },
+              "sparkline": {},
+              "thresholds": {
+                "steps": [
+                  { "value": 0, "color": "green" },
+                  { "value": 5, "color": "yellow" },
+                  { "value": 20, "color": "red" }
+                ]
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\", status=~\"5..\"}[5m])) / sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) * 100",
+                    "seriesNameFormat": "5xx %"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "totalRequests": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Total Requests",
+            "description": "Total number of HTTP requests handled"
+          },
+          "plugin": {
+            "kind": "StatChart",
+            "spec": {
+              "calculation": "last",
+              "format": {
+                "unit": "decimal",
+                "shortValues": true
+              },
+              "sparkline": {}
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(http_request_duration_seconds_count{job=\"backend\"})",
+                    "seriesNameFormat": "total"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "requestRateByEndpoint": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Request Rate by Endpoint",
+            "description": "Requests per second grouped by route"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) by (handler)",
+                    "seriesNameFormat": "{{handler}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "statusCodes": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Response Status Codes",
+            "description": "Request rate grouped by HTTP status code"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) by (status)",
+                    "seriesNameFormat": "HTTP {{status}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "latencyPercentiles": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Response Time Percentiles",
+            "description": "P50 / P95 / P99 latency"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "seconds"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m])) by (le))",
+                    "seriesNameFormat": "p50"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m])) by (le))",
+                    "seriesNameFormat": "p95"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m])) by (le))",
+                    "seriesNameFormat": "p99"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "latencyByEndpoint": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Avg Response Time by Endpoint",
+            "description": "Average latency per route"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "seconds"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_sum{job=\"backend\"}[5m])) by (handler) / sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) by (handler)",
+                    "seriesNameFormat": "{{handler}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "errorRateTimeSeries": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Error Rate Over Time",
+            "description": "5xx and 4xx error rates"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "percent"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\", status=~\"5..\"}[5m])) / sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) * 100",
+                    "seriesNameFormat": "5xx %"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\", status=~\"4..\"}[5m])) / sum(rate(http_request_duration_seconds_count{job=\"backend\"}[5m])) * 100",
+                    "seriesNameFormat": "4xx %"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "errorsByEndpoint": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Errors by Endpoint",
+            "description": "4xx + 5xx requests per endpoint"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum(rate(http_request_duration_seconds_count{job=\"backend\", status=~\"[45]..\"}[5m])) by (handler, status)",
+                    "seriesNameFormat": "{{handler}} ({{status}})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "cpuUsage": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "CPU Usage",
+            "description": "Backend process CPU utilisation"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "rate(process_cpu_seconds_total{job=\"backend\"}[5m])",
+                    "seriesNameFormat": "CPU cores"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "memoryUsage": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Memory Usage",
+            "description": "Resident memory (RSS) of the backend process"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "bytes"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "process_resident_memory_bytes{job=\"backend\"}",
+                    "seriesNameFormat": "RSS"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "process_virtual_memory_bytes{job=\"backend\"}",
+                    "seriesNameFormat": "Virtual"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "openFileDescriptors": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Open File Descriptors",
+            "description": "Number of open file descriptors"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "process_open_fds{job=\"backend\"}",
+                    "seriesNameFormat": "open FDs"
+                  }
+                }
+              }
+            },
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "process_max_fds{job=\"backend\"}",
+                    "seriesNameFormat": "max FDs"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+
+      "pythonGC": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Python GC Collections",
+            "description": "Garbage collector runs per generation"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "rate(python_gc_collections_total{job=\"backend\"}[5m])",
+                    "seriesNameFormat": "gen {{generation}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+
+    },
+
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Overview",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "content": { "$ref": "#/spec/panels/totalRequestRate" }
+            },
+            {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "content": { "$ref": "#/spec/panels/avgResponseTime" }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "content": { "$ref": "#/spec/panels/errorRateStat" }
+            },
+            {
+              "x": 18,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "content": { "$ref": "#/spec/panels/totalRequests" }
+            }
+          ]
+        }
+      },
+
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "HTTP Traffic",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/requestRateByEndpoint" }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/statusCodes" }
+            }
+          ]
+        }
+      },
+
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Latency",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/latencyPercentiles" }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/latencyByEndpoint" }
+            }
+          ]
+        }
+      },
+
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Errors",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/errorRateTimeSeries" }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/errorsByEndpoint" }
+            }
+          ]
+        }
+      },
+
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "System — Process Metrics",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/cpuUsage" }
+            },
+            {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/memoryUsage" }
+            },
+            {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/openFileDescriptors" }
+            },
+            {
+              "x": 12,
+              "y": 8,
+              "width": 12,
+              "height": 8,
+              "content": { "$ref": "#/spec/panels/pythonGC" }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+
