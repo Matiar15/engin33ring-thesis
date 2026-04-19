@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Scan, Archive, LogOut } from 'lucide-react';
+import { useAuth } from '@/features/auth/context';
 
 export function AnalysisHeader() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   return (
     <header className="flex flex-col gap-4 px-4 py-4 border-b border-border bg-card/50 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -27,7 +29,7 @@ export function AnalysisHeader() {
           <span className="font-medium">Archive</span>
         </button>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => { logout(); navigate('/'); }}
           className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
         >
           <LogOut className="w-4 h-4" />
