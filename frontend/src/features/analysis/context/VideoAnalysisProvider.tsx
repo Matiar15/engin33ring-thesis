@@ -19,17 +19,21 @@ export function VideoAnalysisProvider({ children }: VideoAnalysisProviderProps) 
   const { analysisId, startAnalysis, endAnalysis, resetAnalysis } = useAnalysisLifecycle(userId);
 
   const onFrameUploaded = useCallback((data: any) => {
-    dispatch({
-      type: 'ADD_DETECTION',
-      payload: {
-        id: Math.random().toString(36).substr(2, 9),
-        timestamp: new Date(),
-        signType: data.sign,
-        confidence: data.confidence,
-      },
-    });
+    const isDetection = data.sign && data.sign !== "NO_DETECTION";
 
-    if (data.bounding_box) {
+    if (isDetection) {
+      dispatch({
+        type: 'ADD_DETECTION',
+        payload: {
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: new Date(),
+          signType: data.sign,
+          confidence: data.confidence,
+        },
+      });
+    }
+
+    if (isDetection && data.bounding_box) {
       dispatch({
         type: 'SET_BOUNDING_BOXES',
         payload: [{
