@@ -27,4 +27,3 @@ class TestPreprocess:
         blob = adapter._preprocess(image)
 
         assert blob.shape == (1, 3, 320, 320)
-

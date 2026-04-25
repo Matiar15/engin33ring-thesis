@@ -50,4 +50,3 @@ GTSDB_FINE_NAMES: dict[int, str] = {
     42: "end_no_overtaking_trucks",
 }
 # fmt: on
-

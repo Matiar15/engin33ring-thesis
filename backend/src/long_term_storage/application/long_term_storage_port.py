@@ -31,12 +31,3 @@ class LongTermStoragePort(abc.ABC):
         expiration: int = 900,
     ) -> str:
         """"""
-
-    @abc.abstractmethod
-    async def generate_presigned_url(
-        self,
-        bucket_name: str,
-        object_name: str,
-        expiration: int = 900,
-    ) -> str:
-        """"""

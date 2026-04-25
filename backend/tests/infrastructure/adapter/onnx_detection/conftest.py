@@ -22,7 +22,9 @@ def make_settings(**overrides) -> DetectionSettings:
 
 def build_adapter(settings: DetectionSettings | None = None) -> OnnxDetectionAdapter:
     settings = settings or make_settings()
-    with patch("backend.src.infrastructure.adapter.onnx_detection_adapter.ort") as mock_ort:
+    with patch(
+        "backend.src.infrastructure.adapter.onnx_detection_adapter.ort"
+    ) as mock_ort:
         mock_session = MagicMock()
         mock_input = MagicMock()
         mock_input.name = "images"
@@ -46,4 +48,3 @@ def make_onnx_output(
 @pytest.fixture
 def adapter():
     return build_adapter()
-

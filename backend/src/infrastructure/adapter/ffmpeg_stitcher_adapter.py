@@ -95,9 +95,9 @@ class FFMpegStitcherAdapter(StitcherPort):
 
         return video_url
 
-    @staticmethod
     @_tracer.start_as_current_span("FFMpegStitcherAdapter.prepare_frames")
     def _prepare_frames(
+        self,
         image_paths: list[str],
         frames: list[Frame],
         frames_location: str,
@@ -111,10 +111,10 @@ class FFMpegStitcherAdapter(StitcherPort):
         for i, (path, frame) in enumerate(zip(image_paths, frames), start=1):
             img = PIL.Image.open(path)
             img.load()
-            img = img.convert("RGB")
+            img = img.convert("RGB")  # type: ignore
 
             if img.size != target_size:
-                img = img.resize(target_size, PIL.Image.Resampling.LANCZOS)
+                img = img.resize(target_size, PIL.Image.Resampling.LANCZOS)  # type: ignore
 
             self._draw_bounding_box(img, frame)
 

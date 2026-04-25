@@ -13,7 +13,7 @@ class BoundingBox(pydantic.BaseModel):
 
 class FrameResponse(pydantic.BaseModel):
     sign: str
-    bounding_box: BoundingBox
+    bounding_box: BoundingBox | None
     confidence: int = pydantic.Field(ge=0, le=100)
 
 

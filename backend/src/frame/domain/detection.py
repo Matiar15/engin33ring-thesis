@@ -8,4 +8,3 @@ class DetectionResult(pydantic.BaseModel):
     y: float
     width: float
     height: float
-

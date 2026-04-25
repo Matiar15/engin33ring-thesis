@@ -46,12 +46,3 @@ class AnalysisPort(abc.ABC):
         offset: int = 0,
     ) -> list[Analysis]:
         """"""
-
-    @abc.abstractmethod
-    async def get_list(
-        self,
-        user_id: str,
-        limit: int = 10,
-        offset: int = 0,
-    ) -> list[Analysis]:
-        """"""

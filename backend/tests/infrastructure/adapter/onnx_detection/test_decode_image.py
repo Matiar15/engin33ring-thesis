@@ -18,4 +18,3 @@ class TestDecodeImage:
         assert result is not None
         assert result.shape[0] == 50
         assert result.shape[1] == 50
-

@@ -52,4 +52,3 @@ class TestPostprocess:
         score, class_id, _ = result
         assert score == pytest.approx(0.8)
         assert class_id == 0
-

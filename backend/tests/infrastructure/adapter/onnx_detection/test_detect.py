@@ -47,4 +47,3 @@ class TestDetect:
         result = await adapter.detect(encoded.tobytes())
 
         assert result is None
-

@@ -27,4 +27,3 @@ class TestToResult:
         result = adapter._to_result(0.5, 999, box)
 
         assert result.sign_name == "unknown_999"
-
