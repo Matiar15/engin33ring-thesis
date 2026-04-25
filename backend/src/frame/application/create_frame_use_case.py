@@ -74,27 +74,31 @@ class CreateFrameUseCase:
             _logger.info("No sign detected in frame.")
             response = FrameResponse(
                 sign="NO_DETECTION",
-                bounding_box={"x": 0, "y": 0, "width": 0, "height": 0},
+                bounding_box=None,
                 confidence=0,
             )
         else:
-            _logger.info(f"Detected sign: {detection.sign_name} ({detection.confidence:.2f})")
+            _logger.info(
+                f"Detected sign: {detection.sign_name} ({detection.confidence:.2f})"
+            )
             response = map_to_response(detection)
+
+        frame_data = {
+            "id": frame_payload.incoming_id,
+            "frame_url": frame_url,
+            "created_at": datetime.datetime.now(),
+            "sign": response.sign,
+        }
+
+        if response.bounding_box:
+            frame_data["x"] = response.bounding_box.x
+            frame_data["y"] = response.bounding_box.y
+            frame_data["width"] = response.bounding_box.width
+            frame_data["height"] = response.bounding_box.height
 
         await self.analysis_port.update(
             id=str(analysis.id),
-            frame=Frame.from_payload(
-                {
-                    "id": frame_payload.incoming_id,
-                    "frame_url": frame_url,
-                    "created_at": datetime.datetime.now(),
-                    "sign": response.sign,
-                    "x": response.bounding_box.x,
-                    "y": response.bounding_box.y,
-                    "width": response.bounding_box.width,
-                    "height": response.bounding_box.height,
-                }
-            ),
+            frame=Frame.from_payload(frame_data),
             status="processing",
         )
 

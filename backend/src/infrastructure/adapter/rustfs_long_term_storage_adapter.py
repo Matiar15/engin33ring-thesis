@@ -61,3 +61,19 @@ class RustFSLongTermStorageAdapter(LongTermStoragePort):
             _download,
             file_id_=file_id,
         )
+
+    @_tracer.start_as_current_span(
+        "RustFSLongTermStorageAdapter.generate_presigned_url"
+    )
+    async def generate_presigned_url(
+        self,
+        bucket_name: str,
+        object_name: str,
+        expiration: int = 900,
+    ) -> str:
+        return await asyncio.to_thread(
+            self.client.generate_presigned_url,  # type: ignore
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": object_name},
+            ExpiresIn=expiration,
+        )

@@ -18,11 +18,17 @@ _logger = logging.getLogger(__name__)
 class OnnxDetectionAdapter(DetectionPort):
     """ONNX Runtime adapter for YOLOv11 traffic sign detection."""
 
-    def __init__(self, settings: DetectionSettings,) -> None:
+    def __init__(
+        self,
+        settings: DetectionSettings,
+    ) -> None:
         _logger.info(f"Loading ONNX model from {settings.model_path}...")
         self._session = ort.InferenceSession(
             settings.model_path,
-            providers=["CPUExecutionProvider"],
+            providers=[
+                "CUDAExecutionProvider",
+                "CPUExecutionProvider",
+            ],
         )
         self._input_name = self._session.get_inputs()[0].name
         self._input_size = settings.input_size
@@ -35,7 +41,10 @@ class OnnxDetectionAdapter(DetectionPort):
             f"classes={self._num_classes})."
         )
 
-    async def detect(self, image_bytes: bytes,) -> DetectionResult | None:
+    async def detect(
+        self,
+        image_bytes: bytes,
+    ) -> DetectionResult | None:
         return await asyncio.to_thread(self._detect_sync, image_bytes)
 
     def _detect_sync(self, image_bytes: bytes) -> DetectionResult | None:
@@ -52,7 +61,10 @@ class OnnxDetectionAdapter(DetectionPort):
 
         return self._to_result(*best)
 
-    def _decode_image(self, image_bytes: bytes,) -> np.ndarray | None:  # noqa
+    def _decode_image(
+        self,
+        image_bytes: bytes,
+    ) -> np.ndarray | None:  # noqa
         image_array = np.frombuffer(image_bytes, dtype=np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         if image is None:
@@ -72,7 +84,8 @@ class OnnxDetectionAdapter(DetectionPort):
         return predictions.T
 
     def _postprocess(
-        self, predictions: np.ndarray,
+        self,
+        predictions: np.ndarray,
     ) -> tuple[float, int, np.ndarray] | None:
         boxes_xywh = predictions[:, :4]
         class_scores = predictions[:, 4:]
@@ -99,7 +112,9 @@ class OnnxDetectionAdapter(DetectionPort):
         )
 
     def _apply_nms(
-        self, boxes: np.ndarray, scores: np.ndarray,
+        self,
+        boxes: np.ndarray,
+        scores: np.ndarray,
     ) -> np.ndarray:
         x1 = boxes[:, 0] - boxes[:, 2] / 2
         y1 = boxes[:, 1] - boxes[:, 3] / 2
@@ -110,7 +125,7 @@ class OnnxDetectionAdapter(DetectionPort):
             scores.tolist(),
             self._confidence_threshold,
             self._iou_threshold,
-        )
+        )  # type: ignore
 
     @staticmethod
     def _select_best_detection(
@@ -123,7 +138,10 @@ class OnnxDetectionAdapter(DetectionPort):
         return float(scores[best_idx]), int(class_ids[best_idx]), boxes[best_idx]
 
     def _to_result(
-        self, score: float, class_id: int, box_xywh: np.ndarray,
+        self,
+        score: float,
+        class_id: int,
+        box_xywh: np.ndarray,
     ) -> DetectionResult:
         xc, yc, bw, bh = box_xywh
         sz = self._input_size
