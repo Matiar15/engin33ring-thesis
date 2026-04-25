@@ -13,7 +13,7 @@ box "Backend Application (Modular Monolith - Python)" #F0F4F8
 end box
 
 database "MongoDB\n(Shared State)" as Mongo
-participant "MinIO \n(Blob Storage)" as S3
+participant "RustFS \n(Blob Storage)" as S3
 
 == 1. Inicjalizacja Sesji ==
 User -> Front: Klik "Start Analizy"
