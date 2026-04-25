@@ -1,0 +1,49 @@
+# ──────────────────────────────────────────────
+# Training configuration for YOLOv11 fine-tuning
+# Road sign detection – 43 fine-grained classes (GTSDB)
+# ──────────────────────────────────────────────
+
+# Base model – Ultralytics YOLOv11 nano
+# Variants: yolo11n.pt, yolo11s.pt, yolo11m.pt, yolo11l.pt, yolo11x.pt
+model: "yolo11n.pt"
+
+# Path to dataset config (relative to project root)
+data: "data/dataset.yaml"
+
+# Training hyperparameters
+epochs: 150
+batch: 16
+imgsz: 640
+patience: 25          # Early stopping patience (epochs without improvement)
+
+# Optimizer
+optimizer: "AdamW"
+lr0: 0.001            # Initial learning rate
+lrf: 0.01             # Final learning rate (lr0 * lrf)
+weight_decay: 0.0005
+warmup_epochs: 5
+warmup_momentum: 0.8
+
+# Augmentation
+hsv_h: 0.015          # Hue augmentation
+hsv_s: 0.7            # Saturation augmentation
+hsv_v: 0.4            # Value augmentation
+degrees: 10.0         # Rotation (+/- degrees)
+translate: 0.1        # Translation (+/- fraction)
+scale: 0.5            # Scale (+/- gain)
+fliplr: 0.0           # Horizontal flip probability (0.0 – road signs are NOT symmetric)
+flipud: 0.0           # Vertical flip probability
+mosaic: 1.0           # Mosaic augmentation
+mixup: 0.1            # MixUp augmentation
+
+# Performance
+workers: 8
+device: ""            # Auto-detect (cuda/mps/cpu)
+amp: true             # Automatic Mixed Precision
+
+# Saving
+project: "runs/detect"
+name: "train"
+exist_ok: true
+save_period: 10       # Save checkpoint every N epochs
+

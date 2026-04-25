@@ -24,3 +24,10 @@ otel:
 stitcher:
   temporary_dir: "/home/matiar/Programming/engin33ring-thesis/backend/resources/stitcher"
   bucket_name: "engin33ring-thesis-videos"
+
+detection:
+  model_path: "/home/matiar/Programming/engin33ring-thesis/backend/resources/model/best.onnx"
+  input_size: 640
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  num_classes: 43

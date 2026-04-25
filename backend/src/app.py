@@ -19,6 +19,9 @@ from backend.src.analysis.application.get_video_url_use_case import GetVideoUrlU
 from backend.src.infrastructure.adapter.hasher_adapter import HasherAdapter
 from backend.src.infrastructure.adapter.jwt_token_adapter import JWTTokenAdapter
 from backend.src.infrastructure.adapter.mongo_user_adapter import MongoUserAdapter
+from backend.src.infrastructure.adapter.onnx_detection_adapter import (
+    OnnxDetectionAdapter,
+)
 from backend.src.infrastructure.adapter.rustfs_long_term_storage_adapter import (
     RustFSLongTermStorageAdapter,
 )
@@ -82,9 +85,15 @@ async def lifespan(app: fastapi.FastAPI) -> typing.AsyncGenerator[typing.Any]:
     )
     _logger.info("Initialized token port.")
 
+    detection_port = OnnxDetectionAdapter(
+        settings=settings.detection,
+    )
+    _logger.info("Initialized detection port.")
+
     create_frame_use_case = CreateFrameUseCase(
         analysis_port=analysis_port,
         long_term_storage_port=long_term_storage_port,
+        detection_port=detection_port,
     )
     create_analysis_use_case = CreateAnalysisUseCase(
         analysis_port=analysis_port,

@@ -35,8 +35,6 @@ export function useFrameUploader({
       if (!video || video.paused || video.ended) return;
       if (!video.videoWidth || !video.videoHeight) return;
 
-      // Fresh canvas every capture – avoids stale GL/2D context state
-      // that causes garbled frames in Firefox macOS.
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -49,13 +47,15 @@ export function useFrameUploader({
       const blob: Blob | null = await new Promise((resolve) =>
         canvas.toBlob(resolve, 'image/jpeg', 0.8),
       );
-      if (!blob) return;
+      if (!blob || !activeRef.current) return;
 
       const frameFile = new File(
         [blob],
         `frame_${frameCounter.current}.jpg`,
         { type: 'image/jpeg' },
       );
+
+      if (!activeRef.current) return;
 
       try {
         const response = await frameService.uploadFrame(
@@ -64,6 +64,7 @@ export function useFrameUploader({
           frameFile,
           frameCounter.current.toString(),
         );
+        if (!activeRef.current) return;
         onFrameUploaded?.(response);
         frameCounter.current++;
       } catch (error) {

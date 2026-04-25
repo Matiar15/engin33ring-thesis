@@ -1,0 +1,17 @@
+{
+  "kind": "Datasource",
+  "metadata": {
+    "name": "prometheus",
+    "project": "engin33ring-thesis"
+  },
+  "spec": {
+    "default": true,
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "directUrl": "http://prometheus:9090"
+      }
+    }
+  }
+}
+

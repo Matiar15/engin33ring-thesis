@@ -68,6 +68,8 @@ export function useFileDrop({ accept = 'video/*', onFileSelect, validateFile }: 
     if (files?.[0]) {
       processFile(files[0]);
     }
+    // Reset so the same file always triggers the input change
+    e.target.value = '';
   }, [processFile]);
 
   const dragProps = {

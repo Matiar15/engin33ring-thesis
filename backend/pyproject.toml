@@ -29,13 +29,15 @@ dependencies = [
     "pwdlib[argon2]>=0.3.0",
     "pytest>=9.0.2",
     "pillow>=12.2.0",
+    "onnxruntime-gpu==1.24.4",
+    "opencv-python==4.13.0.92",
 ]
 
 [tool.mypy]
 plugins = ['pydantic.mypy']
 
 [[tool.mypy.overrides]]
-module = ["backend.*", "ffmpeg.*"]
+module = ["backend.*", "ffmpeg.*", "onnxruntime.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
