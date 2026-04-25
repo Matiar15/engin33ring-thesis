@@ -18,14 +18,13 @@ end note
 :<b>2. Użytkownik klika "START"</b>;
 
 partition "Inicjalizacja"
-  :Pobranie dostępu do kamery\n(navigator.mediaDevices);
-  :Request POST /analysis/start;
-  :Otrzymanie **SessionID**;
-  :Ustaw flagę isStreaming = true;
+  :Pobranie dostępu do kamery;
+  :Request POST /analysis;
+  :Otrzymanie **AnalysisId**;
 
 
 partition "Pętla Przetwarzania (The Loop)"
-  while (Czy isStreaming == true?) is (Tak)
+  while (Czy video jest uruchomione) is (Tak)
     :Pobierz klatkę z <video>;
     :Rzutuj klatkę na ukryty <canvas>;
 
@@ -34,7 +33,7 @@ partition "Pętla Przetwarzania (The Loop)"
     :Przygotuj **FormData**\n(file: blob, name: "frame.jpg");
 
     :<b>WYSYŁKA (Network)</b>
-    POST /frame/{sessionID};
+    POST /frame;
     :Payload: Multipart/Form-Data;
 
     if (Sukces?) then (200 OK)
@@ -53,22 +52,13 @@ partition "Pętla Przetwarzania (The Loop)"
     Czekaj na zakończenie requestu
     (await response);
 
-    :requestAnimationFrame();
-  endwhile (Nie - User kliknął STOP)
-
-
 partition "Finalizacja"
   :<b>3. Użytkownik klika "STOP"</b>;
-  :Request POST /analysis/finish/{sessionID};
-  :Otrzymanie statusu "PROCESSING" (202);
+  :Request PATCH /analysis;
+  :Oczekiwanie na przetworzenie requestu;
 
   :Wyświetl loader / spinner;
-
-  repeat
-    :Czekaj 2 sekundy (Polling);
-    :Request GET /analysis/status/{sessionID};
-  repeat while (Status == "COMPLETED"?) is (Nie)
-  ->Tak;
+  :Czekaj;
 
   :Pobierz URL wideo z odpowiedzi;
   :Wyświetl odtwarzacz wideo z wynikiem;
