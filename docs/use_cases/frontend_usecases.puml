@@ -14,7 +14,6 @@ package "Backend API System" {
 
   ' Sekcja Auth
   rectangle "Auth & Security" {
-    usecase "Verify Google Token" as UC_Verify
     usecase "Generate Session/JWT" as UC_JWT
   }
 
@@ -40,7 +39,6 @@ package "Backend API System" {
 
 ' --- RELACJE AUTH ---
 Frontend --> UC_Verify
-UC_Verify -- Google : "Validate Code"
 UC_Verify ..> UC_JWT : <<include>>
 UC_JWT -- Mongo : "Check/Create User"
 

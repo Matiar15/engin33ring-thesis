@@ -3,16 +3,13 @@ left to right direction
 skinparam packageStyle rectangle
 
 actor "User" as User
-actor "Google Identity\nProvider" as Google
 actor "Backend API" as Backend
 
 package "Frontend Application" {
 
   rectangle "User Management (Auth)" {
     usecase "Login" as UC_Login
-    usecase "Login via Google" as UC_Google
     usecase "Register Account" as UC_Register
-    usecase "Change Password" as UC_Pass
   }
 
   rectangle "Video Processing & Analysis" {
@@ -28,14 +25,9 @@ package "Frontend Application" {
 ' --- RELACJE AUTH ---
 User --> UC_Login
 User --> UC_Register
-User --> UC_Pass
 
-UC_Google .> UC_Login : <<extend>>
-UC_Google -- Google : "Auth User"
-UC_Google -- Backend : "Verify Token"
 
 UC_Register -- Backend
-UC_Pass -- Backend
 
 ' --- RELACJE WIDEO ---
 User --> UC_Start
