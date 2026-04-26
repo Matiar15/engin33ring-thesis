@@ -13,15 +13,15 @@ box "Backend Application (Modular Monolith - Python)" #F0F4F8
 end box
 
 database "MongoDB\n(Shared State)" as Mongo
-participant "MinIO \n(Blob Storage)" as S3
+participant "RustFS \n(Blob Storage)" as S3
 
 == 1. Inicjalizacja Sesji ==
 User -> Front: Klik "Start Analizy"
-Front -> API: POST /analysis/start\n(Auth Token)
+Front -> API: POST /analysis\n(Auth Token)
 activate API
-API -> Mongo: Create Session\n{status: "RECORDING", frames: []}
-Mongo --> API: session_id
-API --> Front: { session_id: "xyz" }
+API -> Mongo: Create Analysis\n{status: "created", user_id: xyz, modified_at: ...}
+Mongo --> API: analysis_id
+API --> Front: { analysis_id: "xyz" }
 deactivate API
 
 == 2. Pętla Przetwarzania (Fake Streaming) ==
@@ -32,7 +32,7 @@ end note
 
 loop Dopóki trwa nagrywanie
     Front -> Front: Capture Frame (Canvas -> Blob)
-    Front -> API: POST /frame/xyz (image/jpeg)
+    Front -> API: POST /frame (image/jpeg)
     activate API
    
     ' Równoległe działania API
@@ -44,7 +44,7 @@ loop Dopóki trwa nagrywanie
         API -> Mongo: Atomic $push\n{s3_key: "...", order: N}
     end
 
-    API --> Front: JSON Result { bbox: [...], label: "STOP" }
+    API --> Front: JSON Result { sign: ..., bounding_box: [...], confidence: ... }
     deactivate API
    
     Front -> User: Rysuj ramkę na podglądzie (Live)
@@ -52,43 +52,31 @@ end
 
 == 3. Finalizacja i Zlecenie Pracy ==
 User -> Front: Klik "Zakończ"
-Front -> API: POST /analysis/finish/xyz
+Front -> API: PATCH /analysis
 activate API
-API -> Mongo: Update Status\n{ status: "TO_PROCESS" }
-API --> Front: 202 Accepted\n"Przetwarzanie wideo..."
+API -> Mongo: Update Status\n{ status: "stitching" }
+API --> Front: 200 OK \n"Przetwarzanie wideo..."
 deactivate API
 
-== 4. Asynchroniczne Sklejanie (Worker) ==
-note right of Worker
-  Worker działa w osobnym wątku/procesie
-  i odpytuje bazę (Polling)
-end note
+== 4. Sklejanie (Worker) ==
+Worker -> Mongo: FindAndModify { id: "xyz" }
+opt Znaleziono sesję do przetworzenia
+    Worker -> Mongo: Pobierz listę klatek (posortowaną)
+    Mongo --> Worker: [key1, key2, key3...]
 
-loop Co X sekund
-    Worker -> Mongo: FindAndModify\n{status: "TO_PROCESS" -> "PROCESSING"}
-    activate Worker
-   
-    opt Znaleziono sesję do przetworzenia
-        Worker -> Mongo: Pobierz listę klatek (posortowaną)
-        Mongo --> Worker: [key1, key2, key3...]
-       
-        Worker -> S3: Pobierz wszystkie obrazy (.jpg)
-        Worker -> Worker: FFmpeg Stitching\n(JPEGs -> MP4)
-       
-        Worker -> S3: Upload finalnego wideo (.mp4)
-        S3 --> Worker: video_url
-       
-        Worker -> Mongo: Update Session\n{status: "COMPLETED", url: "..."}
-    end
-    deactivate Worker
+    Worker -> S3: Pobierz wszystkie obrazy (.jpg)
+    Worker -> Worker: FFmpeg Stitching\n(JPEGs -> MP4)
+
+    Worker -> S3: Upload finalnego wideo (.mp4)
+    S3 --> Worker: video_url
+
+    Worker -> Mongo: Update Analysis\n{status: "completed", url: "..."}
 end
 
 == 5. Wynik Końcowy ==
-loop Polling (Frontend pyta o status)
-    Front -> API: GET /analysis/status/xyz
-    API -> Mongo: Check Status
-    Mongo --> API: { status: "COMPLETED", videoUrl: "..." }
-    API --> Front: Wynik gotowy
+Mongo --> API: { status: "completed", videoUrl: "..." }
+API -> Front: 200 OK
+API --> Front: Wynik gotowy
 end
 
 Front -> User: Wyświetl gotowe wideo z playera S3
